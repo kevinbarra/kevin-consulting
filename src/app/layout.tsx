@@ -1,19 +1,18 @@
-import type { Metadata, Viewport } from "next"; // <--- Importamos Viewport
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
+import FloatingCTA from "@/components/layout/FloatingCTA"; // <--- IMPORTACIÓN NUEVA
 import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
-// 1. CONFIGURACIÓN DE LA BARRA DEL CELULAR (APP FEEL)
 export const viewport: Viewport = {
-  themeColor: "#0f172a", // El mismo color oscuro de tu fondo
+  themeColor: "#0f172a",
   width: "device-width",
   initialScale: 1,
 };
 
-// 2. METADATOS SEO
 export const metadata: Metadata = {
   title: "Kevin Consulting | Transformación Digital",
   description: "Ingeniería de software a la medida. Optimizamos inventarios, procesos y ventas para panaderías, restaurantes y contratistas.",
@@ -34,6 +33,10 @@ export default function RootLayout({
       <body className={`${inter.className} bg-slate-950 text-white antialiased`}>
         <Navbar />
         {children}
+        
+        {/* Botón Flotante de WhatsApp */}
+        <FloatingCTA />
+        
         <Analytics />
       </body>
     </html>
