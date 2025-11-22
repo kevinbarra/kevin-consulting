@@ -7,7 +7,7 @@ import { ArrowRight, CheckCircle2, Star, TrendingUp, Clock, Layout, FileText } f
 import HowItWorks from '@/components/sections/HowItWorks';
 import About from '@/components/sections/About';
 import Testimonials from '@/components/sections/Testimonials';
-import Footer from '@/components/layout/Footer'; // <--- IMPORTAMOS EL NUEVO FOOTER
+import Footer from '@/components/layout/Footer';
 
 export default function Home() {
   
@@ -21,49 +21,54 @@ export default function Home() {
   return (
     <main className="relative w-full min-h-screen bg-[#0f172a] text-white overflow-x-hidden">
       
-      {/* SECCIÓN 1: HERO */}
+      {/* --- SECCIÓN 1: HERO PREMIUM (NUEVO DISEÑO) --- */}
       <section className="relative h-screen w-full flex flex-col items-center justify-center">
+        
+        {/* Logo Tipográfico en Hero */}
+        <div className="absolute top-8 left-8 md:top-12 md:left-12 z-30 font-bold text-xl tracking-tight hidden md:block">
+          KEVIN<span className="text-blue-500">CONSULTING</span>
+        </div>
+
         <div className="absolute inset-0 z-0">
           <Canvas camera={{ position: [0, 0, 50], fov: 50 }}>
             <ambientLight intensity={0.5} />
-            <pointLight position={[10, 10, 10]} color="#10b981" />
+            <pointLight position={[10, 10, 10]} color="#3b82f6" />
             <Suspense fallback={null}>
               <Particles count={3500} />
             </Suspense>
           </Canvas>
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0f172a]/70 to-[#0f172a] z-10" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0f172a]/50 via-[#0f172a]/80 to-[#0f172a] z-10" />
         </div>
 
-        <div className="relative z-20 text-center px-4 max-w-5xl mx-auto mt-[-50px]">
-          <div className="inline-block mb-6 px-4 py-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 backdrop-blur-md">
-            <span className="text-blue-300 text-xs font-bold tracking-[0.2em] uppercase">
-              Sistemas a la Medida
-            </span>
-          </div>
-
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-tight">
-            Tu negocio tiene potencial.<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
-              Nosotros le ponemos orden.
+        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto">
+          
+          {/* Título de Autoridad */}
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
+            Ingeniería de Software para
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-200">
+              Negocios que Escalan.
             </span>
           </h1>
           
-          <p className="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-            Dejemos de adivinar. Transformamos el caos de libretas y mensajes perdidos en sistemas digitales que te hacen ganar más dinero.
+          {/* Subtítulo Directo */}
+          <p className="text-slate-300 text-lg md:text-2xl max-w-2xl mx-auto mb-10 leading-relaxed font-light">
+            Optimizamos operaciones. Eliminamos el caos. Aumentamos tu rentabilidad con sistemas a la medida.
           </p>
 
+          {/* Botón Principal */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button 
                 onClick={scrollToSolutions}
-                className="px-8 py-4 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold transition-all shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2"
+                className="group px-8 py-4 bg-blue-600 hover:bg-blue-700 rounded-full font-bold transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-3 text-lg"
               >
-                  Ver Soluciones <ArrowRight size={20} />
+                  Ver Soluciones 
+                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </button>
           </div>
         </div>
       </section>
 
-      {/* SECCIÓN 2: SOLUCIONES */}
+      {/* --- SECCIÓN 2: SOLUCIONES (BENTO GRID V4) --- */}
       <section id="soluciones" className="relative z-20 py-24 px-6 md:px-10 max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Problemas Reales, Soluciones Claras</h2>
@@ -71,7 +76,8 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* CASO 1 */}
+          
+          {/* CASO 1: PANADERÍA */}
           <div className="md:col-span-2 bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-blue-500/30 transition-all group overflow-hidden relative">
             <div className="absolute top-0 right-0 p-32 bg-blue-500/10 blur-[80px] rounded-full -z-10" />
             <div className="flex flex-col md:flex-row gap-8 items-center">
@@ -113,7 +119,8 @@ export default function Home() {
               </div>
             </div>
           </div>
-          {/* CASO 2 */}
+
+          {/* CASO 2: POLLOS */}
           <div className="bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-orange-500/30 transition-all group flex flex-col relative overflow-hidden">
              <div className="absolute bottom-0 left-0 p-20 bg-orange-500/10 blur-[60px] rounded-full -z-10" />
             <div className="inline-block px-3 py-1 bg-orange-500/10 text-orange-400 rounded-lg text-xs font-bold mb-4 w-fit">PROBLEMA: CAOS</div>
@@ -133,7 +140,8 @@ export default function Home() {
               <p className="text-center text-xs text-slate-500 mt-2">Digitalizamos tu sala de espera.</p>
             </div>
           </div>
-          {/* CASO 3 */}
+
+          {/* CASO 3: CONTRATISTA */}
           <div className="bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-blue-500/30 transition-all group flex flex-col relative overflow-hidden">
              <div className="absolute top-0 right-0 p-20 bg-blue-500/10 blur-[60px] rounded-full -z-10" />
             <div className="inline-block px-3 py-1 bg-blue-500/10 text-blue-400 rounded-lg text-xs font-bold mb-4 w-fit">PROBLEMA: IMAGEN</div>
@@ -149,7 +157,8 @@ export default function Home() {
                <div className="mt-2 w-full py-1 bg-blue-600 text-white text-[8px] text-center rounded">Get a Free Quote</div>
             </div>
           </div>
-          {/* CASO 4 */}
+
+          {/* CASO 4: PAPELES */}
           <div className="md:col-span-2 bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-purple-500/30 transition-all group overflow-hidden relative">
              <div className="absolute bottom-0 left-0 p-32 bg-purple-500/10 blur-[80px] rounded-full -z-10" />
             <div className="flex flex-col md:flex-row-reverse gap-8 items-center">
@@ -196,7 +205,7 @@ export default function Home() {
       <About />
 
       {/* FOOTER */}
-      <Footer /> {/* <--- Aquí está el footer nuevo */}
+      <Footer />
     </main>
   );
 }

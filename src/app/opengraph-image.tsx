@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-// Configuración de la imagen (Estándar para Facebook/WhatsApp/LinkedIn)
+// Configuración de la imagen
 export const runtime = 'edge';
 export const alt = 'Kevin Consulting - Transformación Digital';
 export const size = {
@@ -14,7 +14,7 @@ export default async function Image() {
     (
       <div
         style={{
-          background: '#0f172a', // Fondo Slate-950
+          background: '#0f172a', // Fondo oscuro premium
           width: '100%',
           height: '100%',
           display: 'flex',
@@ -25,31 +25,29 @@ export default async function Image() {
           position: 'relative',
         }}
       >
-        {/* Fondo Decorativo (Gradientes) */}
-        <div style={{ position: 'absolute', top: '-20%', left: '-10%', width: '600px', height: '600px', background: '#3b82f6', filter: 'blur(150px)', opacity: 0.2, borderRadius: '100%' }} />
-        <div style={{ position: 'absolute', bottom: '-20%', right: '-10%', width: '600px', height: '600px', background: '#10b981', filter: 'blur(150px)', opacity: 0.2, borderRadius: '100%' }} />
+        {/* Sutil degradado de fondo para dar profundidad */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(circle at 50% 0%, #1e3a8a 0%, #0f172a 70%)', opacity: 0.4, zIndex: 0 }} />
 
-        {/* Contenedor Principal */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10 }}>
           
-          {/* Badge */}
-          <div style={{ display: 'flex', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '20px', padding: '8px 20px', marginBottom: '40px' }}>
-             <span style={{ color: '#60a5fa', fontSize: 24, fontWeight: 700, letterSpacing: '2px' }}>KEVIN CONSULTING</span>
+          {/* Logo Tipográfico Pequeño */}
+          <div style={{ color: '#60a5fa', fontSize: 20, fontWeight: 700, letterSpacing: '2px', marginBottom: '30px' }}>
+            KEVIN CONSULTING
           </div>
 
-          {/* Título Grande */}
+          {/* Título Grande y Claro */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-            <span style={{ color: 'white', fontSize: 80, fontWeight: 900, lineHeight: 1.1, marginBottom: 10 }}>
+            <span style={{ color: '#ffffff', fontSize: 70, fontWeight: 900, lineHeight: 1.1 }}>
               Ingeniería de Software
             </span>
-            <span style={{ backgroundImage: 'linear-gradient(90deg, #60a5fa, #34d399)', backgroundClip: 'text', color: 'transparent', fontSize: 80, fontWeight: 900, lineHeight: 1.1 }}>
-              para Negocios Reales
+            <span style={{ color: '#93c5fd', fontSize: 70, fontWeight: 900, lineHeight: 1.1 }}>
+              para Negocios Reales.
             </span>
           </div>
 
-          {/* Subtítulo */}
-          <p style={{ color: '#94a3b8', fontSize: 32, marginTop: 40, maxWidth: '800px', textAlign: 'center' }}>
-            Optimizamos inventarios, procesos y ventas. Sin complicaciones.
+          {/* Subtítulo Informativo */}
+          <p style={{ color: '#cbd5e1', fontSize: 28, marginTop: 30, maxWidth: '700px', textAlign: 'center', fontWeight: 400 }}>
+            Optimizamos inventarios, procesos y ventas con tecnología a la medida.
           </p>
 
         </div>
