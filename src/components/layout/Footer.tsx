@@ -23,20 +23,31 @@ export default function Footer() {
           <div>
             <h4 className="font-bold text-white mb-6">Soluciones</h4>
             <ul className="space-y-4 text-sm text-slate-400">
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Inventarios</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Puntos de Venta</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Web Corporativa</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Apps a la Medida</a></li>
+              <li><a href="#soluciones" className="hover:text-blue-400 transition-colors">Inventarios</a></li>
+              <li><a href="#soluciones" className="hover:text-blue-400 transition-colors">Puntos de Venta</a></li>
+              <li><a href="#soluciones" className="hover:text-blue-400 transition-colors">Web Corporativa</a></li>
+              <li><a href="#soluciones" className="hover:text-blue-400 transition-colors">Apps a la Medida</a></li>
             </ul>
           </div>
 
-          {/* Columna 3: Legal */}
+          {/* Columna 3: Legal (ACTUALIZADA) */}
           <div>
             <h4 className="font-bold text-white mb-6">Legal</h4>
             <ul className="space-y-4 text-sm text-slate-400">
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Términos de Servicio</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Aviso de Privacidad</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Garantía de Software</a></li>
+              <li>
+                <a href="/legal/terminos" className="hover:text-blue-400 transition-colors">
+                    Términos de Servicio
+                </a>
+              </li>
+              <li>
+                <a href="/legal/privacidad" className="hover:text-blue-400 transition-colors">
+                    Aviso de Privacidad
+                </a>
+              </li>
+              <li>
+                {/* Enlace deshabilitado visualmente hasta que exista */}
+                <span className="text-slate-600 cursor-not-allowed">Garantía de Software</span>
+              </li>
             </ul>
           </div>
         </div>
