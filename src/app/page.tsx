@@ -21,10 +21,10 @@ export default function Home() {
   return (
     <main className="relative w-full min-h-screen bg-[#0f172a] text-white overflow-x-hidden">
       
-      {/* --- SECCIÓN 1: HERO PREMIUM (NUEVO DISEÑO) --- */}
+      {/* --- SECCIÓN 1: HERO (DISEÑO PREMIUM + TEXTO EMPÁTICO) --- */}
       <section className="relative h-screen w-full flex flex-col items-center justify-center">
         
-        {/* Logo Tipográfico en Hero */}
+        {/* Logo sutil */}
         <div className="absolute top-8 left-8 md:top-12 md:left-12 z-30 font-bold text-xl tracking-tight hidden md:block">
           KEVIN<span className="text-blue-500">CONSULTING</span>
         </div>
@@ -42,33 +42,33 @@ export default function Home() {
 
         <div className="relative z-20 text-center px-6 max-w-4xl mx-auto">
           
-          {/* Título de Autoridad */}
+          {/* TÍTULO: Empático pero Poderoso */}
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
-            Ingeniería de Software para
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-200">
-              Negocios que Escalan.
+            Tu negocio tiene potencial.
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
+              Dale la estructura para crecer.
             </span>
           </h1>
           
-          {/* Subtítulo Directo */}
+          {/* SUBTÍTULO: Aterrizado a la realidad (cero tecnicismos) */}
           <p className="text-slate-300 text-lg md:text-2xl max-w-2xl mx-auto mb-10 leading-relaxed font-light">
-            Optimizamos operaciones. Eliminamos el caos. Aumentamos tu rentabilidad con sistemas a la medida.
+            Olvídate del papel y el caos. Creamos el sistema exacto que necesitas para controlar tus inventarios, citas y ventas sin complicarte la vida.
           </p>
 
-          {/* Botón Principal */}
+          {/* BOTÓN: Invitación a la acción clara */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button 
                 onClick={scrollToSolutions}
                 className="group px-8 py-4 bg-blue-600 hover:bg-blue-700 rounded-full font-bold transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-3 text-lg"
               >
-                  Ver Soluciones 
+                  Ver cómo te ayudamos
                   <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </button>
           </div>
         </div>
       </section>
 
-      {/* --- SECCIÓN 2: SOLUCIONES (BENTO GRID V4) --- */}
+      {/* --- SECCIÓN 2: SOLUCIONES (Misma que tenías, funciona perfecto) --- */}
       <section id="soluciones" className="relative z-20 py-24 px-6 md:px-10 max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Problemas Reales, Soluciones Claras</h2>
