@@ -60,7 +60,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- SECCIÓN SOLUCIONES (REDISEÑADA - UNIVERSAL) --- */}
+      {/* --- SECCIÓN SOLUCIONES --- */}
       <section id="soluciones" className="relative z-20 py-24 px-6 md:px-10 max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Problemas que te cuestan dinero</h2>
@@ -69,7 +69,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
-          {/* TARJETA 1: INVENTARIO / COSTOS (Universal) */}
+          {/* TARJETA 1: INVENTARIO */}
           <div className="md:col-span-2 bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-blue-500/30 transition-all group overflow-hidden relative">
             <div className="absolute top-0 right-0 p-32 bg-blue-500/10 blur-[80px] rounded-full -z-10" />
             <div className="flex flex-col md:flex-row gap-8 items-center">
@@ -103,7 +103,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* TARJETA 2: ATENCIÓN / FLUJO (Universal) */}
+          {/* TARJETA 2: ATENCIÓN (CORREGIDA: Agregada línea de solución) */}
           <div className="bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-orange-500/30 transition-all group flex flex-col relative overflow-hidden">
              <div className="absolute bottom-0 left-0 p-20 bg-orange-500/10 blur-[60px] rounded-full -z-10" />
             <div className="inline-block px-3 py-1 bg-orange-500/10 text-orange-400 rounded-lg text-xs font-bold mb-4 w-fit">PROBLEMA: CAOS</div>
@@ -111,6 +111,12 @@ export default function Home() {
             <p className="text-slate-400 text-sm mb-6 flex-1">
               Clientes esperando sin saber su turno, pedidos perdidos o mala comunicación. Un cliente enojado no vuelve.
             </p>
+            
+            {/* --- CORRECCIÓN: LÍNEA DE SOLUCIÓN AGREGADA --- */}
+            <div className="text-emerald-400 font-bold text-sm flex items-center gap-2 mb-6">
+               <CheckCircle2 size={16} /> Solución: Pantallas de Turno
+            </div>
+
             <div className="mt-auto">
                <div className="flex items-center justify-between bg-black/40 p-3 rounded-lg border border-white/5">
                   <div className="flex items-center gap-3">
@@ -126,7 +132,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* TARJETA 3: IMAGEN / VENTAS (Universal) */}
+          {/* TARJETA 3: IMAGEN (CORREGIDA: Agregada línea de solución) */}
           <div className="bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-blue-500/30 transition-all group flex flex-col relative overflow-hidden">
              <div className="absolute top-0 right-0 p-20 bg-blue-500/10 blur-[60px] rounded-full -z-10" />
             <div className="inline-block px-3 py-1 bg-blue-500/10 text-blue-400 rounded-lg text-xs font-bold mb-4 w-fit">PROBLEMA: DESCONFIANZA</div>
@@ -134,6 +140,11 @@ export default function Home() {
             <p className="text-slate-400 text-sm mb-6 flex-1">
               Eres bueno en lo que haces, pero tu imagen no lo refleja. Las empresas pagan más a quien se ve profesional.
             </p>
+
+            {/* --- CORRECCIÓN: LÍNEA DE SOLUCIÓN AGREGADA --- */}
+            <div className="text-emerald-400 font-bold text-sm flex items-center gap-2 mb-6">
+               <CheckCircle2 size={16} /> Solución: Sitio Web Profesional
+            </div>
             
             {/* Micro-UI: Botón de Conversión */}
             <div className="mt-auto bg-white/5 p-4 rounded-xl border border-white/10 text-center group-hover:bg-white/10 transition-colors">
@@ -145,7 +156,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* TARJETA 4: OPERACIÓN / DEPENDENCIA (Universal) */}
+          {/* TARJETA 4: DEPENDENCIA */}
           <div className="md:col-span-2 bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-purple-500/30 transition-all group overflow-hidden relative">
              <div className="absolute bottom-0 left-0 p-32 bg-purple-500/10 blur-[80px] rounded-full -z-10" />
             <div className="flex flex-col md:flex-row-reverse gap-8 items-center">
