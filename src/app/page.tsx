@@ -3,12 +3,12 @@
 import { Canvas } from '@react-three/fiber';
 import Particles from '@/components/canvas/Particles';
 import { Suspense } from 'react';
-import { ArrowRight, CheckCircle2, Star, BarChart3, Users, Layers, MousePointerClick, TrendingUp, Clock, Layout, FileText } from 'lucide-react';
+import { ArrowRight, CheckCircle2, BarChart3, Users, Layers, MousePointerClick } from 'lucide-react';
 import HowItWorks from '@/components/sections/HowItWorks';
 import About from '@/components/sections/About';
 import Testimonials from '@/components/sections/Testimonials';
 import Footer from '@/components/layout/Footer';
-import Reveal from '@/components/layout/Reveal'; // <--- Importamos la animación nueva
+import Reveal from '@/components/layout/Reveal';
 
 export default function Home() {
 
@@ -70,7 +70,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- SECCIÓN SOLUCIONES (TEXTOS UNIVERSALES + ANIMACIÓN) --- */}
+      {/* --- SECCIÓN SOLUCIONES --- */}
       <section id="soluciones" className="relative z-20 py-24 px-6 md:px-10 max-w-7xl mx-auto">
         <div className="text-center mb-16 flex flex-col items-center">
           <Reveal>
@@ -83,7 +83,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-          {/* TARJETA 1: FUGA DE DINERO (Antes Inventario Pan) */}
+          {/* TARJETA 1: FUGA DE DINERO (Gráfica Animada) */}
           <div className="md:col-span-2">
             <Reveal width="100%">
               <div className="h-full bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-blue-500/30 transition-all group overflow-hidden relative">
@@ -100,7 +100,7 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* MICRO-UI */}
+                  {/* MICRO-UI: Gráfica que crece */}
                   <div className="w-full md:w-64 bg-[#0f172a] rounded-xl border border-white/10 p-4 shadow-xl">
                     <div className="flex justify-between items-center mb-4">
                       <span className="text-xs text-slate-500 font-mono">REPORTE SEMANAL</span>
@@ -121,7 +121,7 @@ export default function Home() {
             </Reveal>
           </div>
 
-          {/* TARJETA 2: CAOS / ATENCIÓN (Antes Pollos) */}
+          {/* TARJETA 2: CAOS / ATENCIÓN (Micro-animación de pulso en datos) */}
           <div className="h-full">
             <Reveal width="100%" delay={0.2}>
               <div className="h-full bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-orange-500/30 transition-all group flex flex-col relative overflow-hidden">
@@ -135,15 +135,16 @@ export default function Home() {
                   <CheckCircle2 size={16} /> Solución: Pantallas de Turno
                 </div>
                 <div className="mt-auto">
-                  <div className="flex items-center justify-between bg-black/40 p-3 rounded-lg border border-white/5">
+                  {/* MICRO-UI: El contenedor de datos parpadea sutilmente */}
+                  <div className="flex items-center justify-between bg-black/40 p-3 rounded-lg border border-white/5 animate-pulse">
                     <div className="flex items-center gap-3">
                       <Users size={16} className="text-orange-400" />
                       <div>
                         <div className="text-[10px] text-slate-500 uppercase">En Espera</div>
-                        <div className="text-lg font-bold text-white">0 Personas</div>
+                        <div className="text-lg font-bold text-white">3 Personas</div>
                       </div>
                     </div>
-                    <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.8)]"></div>
+                    <div className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]"></div>
                   </div>
                   <p className="text-center text-xs text-slate-500 mt-2">Flujo de servicio optimizado.</p>
                 </div>
@@ -151,7 +152,7 @@ export default function Home() {
             </Reveal>
           </div>
 
-          {/* TARJETA 3: IMAGEN (Universal) */}
+          {/* TARJETA 3: IMAGEN (Micro-animación de pulso en botón) */}
           <div className="h-full">
             <Reveal width="100%">
               <div className="h-full bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-blue-500/30 transition-all group flex flex-col relative overflow-hidden">
@@ -164,9 +165,10 @@ export default function Home() {
                 <div className="text-emerald-400 font-bold text-sm flex items-center gap-2 mb-6">
                   <CheckCircle2 size={16} /> Solución: Web Profesional
                 </div>
-                <div className="mt-auto bg-white/5 p-4 rounded-xl border border-white/10 text-center group-hover:bg-white/10 transition-colors">
+                <div className="mt-auto bg-white/5 p-4 rounded-xl border border-white/10 text-center transition-colors relative overflow-hidden">
                   <div className="text-xs text-slate-300 mb-2">Tu Web Trabajando 24/7</div>
-                  <button className="w-full py-2 bg-blue-600 text-white text-[10px] font-bold rounded shadow-lg flex items-center justify-center gap-2 transform group-hover:scale-105 transition-transform">
+                  {/* MICRO-UI: Botón con pulso sutil */}
+                  <button className="w-full py-2 bg-blue-600 text-white text-[10px] font-bold rounded shadow-lg flex items-center justify-center gap-2 hover:scale-105 transition-transform animate-pulse">
                     <MousePointerClick size={12} />
                     Solicitar Cotización
                   </button>
@@ -175,7 +177,7 @@ export default function Home() {
             </Reveal>
           </div>
 
-          {/* TARJETA 4: DEPENDENCIA (Antes Papeles) */}
+          {/* TARJETA 4: DEPENDENCIA (Micro-animación de brillo en números) */}
           <div className="md:col-span-2">
             <Reveal width="100%" delay={0.2}>
               <div className="h-full bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-purple-500/30 transition-all group overflow-hidden relative">
@@ -194,12 +196,15 @@ export default function Home() {
 
                   {/* MICRO-UI ANIMADA */}
                   <div className="w-full md:w-64 relative">
-                    <div className="relative bg-[#0f172a] rounded-xl border border-purple-500/30 p-4 shadow-2xl z-10">
-                      <div className="flex justify-between items-center mb-4 border-b border-white/5 pb-2">
+                    <div className="relative bg-[#0f172a] rounded-xl border border-purple-500/30 p-4 shadow-2xl z-10 overflow-hidden">
+                      {/* Efecto de brillo pasando */}
+                      <div className="absolute top-0 -left-[100%] w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_3s_infinite]"></div>
+
+                      <div className="flex justify-between items-center mb-4 border-b border-white/5 pb-2 relative z-10">
                         <span className="text-xs font-bold text-white">ESTADO DEL NEGOCIO</span>
                         <div className="px-2 py-0.5 bg-green-500/20 text-green-400 text-[8px] font-bold rounded uppercase animate-pulse">Online</div>
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-3 relative z-10">
                         <div className="flex items-center gap-3">
                           <div className="p-1.5 bg-blue-500/20 rounded text-blue-400"><Layers size={12} /></div>
                           <div className="flex-1">
@@ -215,7 +220,7 @@ export default function Home() {
                           </div>
                         </div>
                       </div>
-                      <div className="mt-3 text-[10px] text-slate-500 text-center italic">
+                      <div className="mt-3 text-[10px] text-slate-500 text-center italic relative z-10">
                         Tú estás descansando. Tu sistema trabaja.
                       </div>
                     </div>
@@ -228,7 +233,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- SECCIONES FINALES (TAMBIÉN ANIMADAS) --- */}
+      {/* --- SECCIONES FINALES --- */}
       <Reveal width="100%">
         <HowItWorks />
       </Reveal>

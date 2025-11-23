@@ -1,6 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
+import { useRef } from 'react';
 
 interface Props {
     children: React.ReactNode;
@@ -9,21 +10,21 @@ interface Props {
 }
 
 export default function Reveal({ children, delay = 0, width = 'fit-content' }: Props) {
+    const ref = useRef(null);
+    // Ajustamos el margen para que se active un poco antes y sea más seguro
+    const isInView = useInView(ref, { once: true, margin: "-50px" });
+
     return (
-        <div style={{ position: 'relative', width, overflow: 'hidden' }}>
+        // Quitamos overflow:hidden que a veces causa problemas en móvil
+        <div ref={ref} style={{ position: 'relative', width }}>
             <motion.div
                 variants={{
-                    hidden: { opacity: 0, y: 50 }, // Bajamos un poco el desplazamiento (de 75 a 50) para que sea más sutil
+                    hidden: { opacity: 0, y: 50 },
                     visible: { opacity: 1, y: 0 },
                 }}
                 initial="hidden"
-                whileInView="visible" // Esto hace que se anime cada vez que entra en vista
-                viewport={{
-                    once: false, // <--- CLAVE: Permitimos que se repita
-                    margin: "-100px", // Tiene que entrar 100px en la pantalla para activarse (evita disparos accidentales)
-                    amount: 0.3 // El 30% del elemento debe ser visible para activarse
-                }}
-                transition={{ duration: 0.6, delay: delay, ease: "easeOut" }} // Un poco más rápido (0.6s) para sentirse ágil
+                animate={isInView ? "visible" : "hidden"}
+                transition={{ duration: 0.6, delay: delay, ease: "easeOut" }}
             >
                 {children}
             </motion.div>
