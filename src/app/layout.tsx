@@ -33,10 +33,10 @@ export default function RootLayout({
       <body className={`${inter.className} bg-slate-950 text-white antialiased`}>
         <Navbar />
         {children}
-        
+
         {/* Botón Flotante de WhatsApp */}
         <FloatingCTA />
-        
+
         <Analytics />
       </body>
     </html>

@@ -3,14 +3,15 @@
 import { Canvas } from '@react-three/fiber';
 import Particles from '@/components/canvas/Particles';
 import { Suspense } from 'react';
-import { ArrowRight, CheckCircle2, Star, BarChart3, Users, Layers, MousePointerClick, TrendingUp, Clock, Layout, FileText } from 'lucide-react'; 
+import { ArrowRight, CheckCircle2, Star, BarChart3, Users, Layers, MousePointerClick, TrendingUp, Clock, Layout, FileText } from 'lucide-react';
 import HowItWorks from '@/components/sections/HowItWorks';
 import About from '@/components/sections/About';
 import Testimonials from '@/components/sections/Testimonials';
 import Footer from '@/components/layout/Footer';
+import Reveal from '@/components/layout/Reveal'; // <--- Importamos la animación nueva
 
 export default function Home() {
-  
+
   const scrollToSolutions = () => {
     const section = document.getElementById('soluciones');
     if (section) {
@@ -20,7 +21,7 @@ export default function Home() {
 
   return (
     <main className="relative w-full min-h-screen bg-[#0f172a] text-white overflow-x-hidden">
-      
+
       {/* --- HERO SECTION --- */}
       <section className="relative h-screen w-full flex flex-col items-center justify-center">
         <div className="absolute top-8 left-8 md:top-12 md:left-12 z-30 font-bold text-xl tracking-tight hidden md:block">
@@ -38,177 +39,208 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-[#0f172a]/50 via-[#0f172a]/80 to-[#0f172a] z-10" />
         </div>
 
-        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
-            Tu negocio tiene potencial.
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
-              Dale la estructura para crecer.
-            </span>
-          </h1>
-          <p className="text-slate-300 text-lg md:text-2xl max-w-2xl mx-auto mb-10 leading-relaxed font-light">
-            Olvídate del papel y el caos. Creamos el sistema exacto que necesitas para controlar tus inventarios, citas y ventas sin complicarte la vida.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button 
+        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">
+
+          <Reveal>
+            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
+              Tu negocio tiene potencial.
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
+                Dale la estructura para crecer.
+              </span>
+            </h1>
+          </Reveal>
+
+          <Reveal delay={0.2}>
+            <p className="text-slate-300 text-lg md:text-2xl max-w-2xl mx-auto mb-10 leading-relaxed font-light">
+              Olvídate del papel y el caos. Creamos el sistema exacto que necesitas para controlar tus inventarios, citas y ventas sin complicarte la vida.
+            </p>
+          </Reveal>
+
+          <Reveal delay={0.4}>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
                 onClick={scrollToSolutions}
                 className="group px-8 py-4 bg-blue-600 hover:bg-blue-700 rounded-full font-bold transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-3 text-lg"
               >
-                  Ver cómo te ayudamos
-                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                Ver cómo te ayudamos
+                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </button>
-          </div>
+            </div>
+          </Reveal>
         </div>
       </section>
 
-      {/* --- SECCIÓN SOLUCIONES --- */}
+      {/* --- SECCIÓN SOLUCIONES (TEXTOS UNIVERSALES + ANIMACIÓN) --- */}
       <section id="soluciones" className="relative z-20 py-24 px-6 md:px-10 max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Problemas que te cuestan dinero</h2>
-          <p className="text-slate-400">Identifica tu cuello de botella. Nosotros lo destapamos.</p>
+        <div className="text-center mb-16 flex flex-col items-center">
+          <Reveal>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Problemas que te cuestan dinero</h2>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <p className="text-slate-400">Identifica tu cuello de botella. Nosotros lo destapamos.</p>
+          </Reveal>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
-          {/* TARJETA 1: INVENTARIO */}
-          <div className="md:col-span-2 bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-blue-500/30 transition-all group overflow-hidden relative">
-            <div className="absolute top-0 right-0 p-32 bg-blue-500/10 blur-[80px] rounded-full -z-10" />
-            <div className="flex flex-col md:flex-row gap-8 items-center">
-              <div className="flex-1">
-                <div className="inline-block px-3 py-1 bg-red-500/10 text-red-400 rounded-lg text-xs font-bold mb-4">PROBLEMA: FUGA DE DINERO</div>
-                <h3 className="text-2xl font-bold mb-3">"Compro mucho y vendo poco"</h3>
-                <p className="text-slate-400 text-sm leading-relaxed mb-6">
-                  Ya sea pan, refacciones o insumos. Si compras a ciegas, el dinero se queda estancado en la bodega o se va a la basura (merma).
-                </p>
-                <div className="text-emerald-400 font-bold text-sm flex items-center gap-2">
-                  <CheckCircle2 size={16} /> Solución: Control de Stock Inteligente
-                </div>
-              </div>
 
-              {/* MICRO-UI: Gráfica de Costos */}
-              <div className="w-full md:w-64 bg-[#0f172a] rounded-xl border border-white/10 p-4 shadow-xl">
-                <div className="flex justify-between items-center mb-4">
-                    <span className="text-xs text-slate-500 font-mono">REPORTE SEMANAL</span>
-                    <BarChart3 size={14} className="text-slate-500"/>
-                </div>
-                <div className="flex items-end gap-2 h-20 mb-2 px-2 border-b border-white/5">
-                    <div className="w-1/4 h-[80%] bg-red-500/50 rounded-t-sm relative group-hover:h-[40%] transition-all duration-1000"><div className="absolute -top-4 left-0 text-[8px] text-red-300">Gastos</div></div>
-                    <div className="w-1/4 h-[40%] bg-emerald-500/50 rounded-t-sm relative group-hover:h-[90%] transition-all duration-1000"><div className="absolute -top-4 left-0 text-[8px] text-emerald-300">Ventas</div></div>
-                    <div className="w-1/4 h-[30%] bg-blue-500/50 rounded-t-sm"></div>
-                    <div className="w-1/4 h-[50%] bg-purple-500/50 rounded-t-sm"></div>
-                </div>
-                <div className="text-[10px] text-slate-400 text-center mt-2">
-                    Detectamos fuga de $3,000 en insumos innecesarios.
+          {/* TARJETA 1: FUGA DE DINERO (Antes Inventario Pan) */}
+          <div className="md:col-span-2">
+            <Reveal width="100%">
+              <div className="h-full bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-blue-500/30 transition-all group overflow-hidden relative">
+                <div className="absolute top-0 right-0 p-32 bg-blue-500/10 blur-[80px] rounded-full -z-10" />
+                <div className="flex flex-col md:flex-row gap-8 items-center">
+                  <div className="flex-1">
+                    <div className="inline-block px-3 py-1 bg-red-500/10 text-red-400 rounded-lg text-xs font-bold mb-4">PROBLEMA: FUGA DE DINERO</div>
+                    <h3 className="text-2xl font-bold mb-3">"Compro mucho y vendo poco"</h3>
+                    <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                      Ya sea pan, refacciones o insumos. Si compras a ciegas, el dinero se queda estancado en la bodega o se va a la basura (merma).
+                    </p>
+                    <div className="text-emerald-400 font-bold text-sm flex items-center gap-2">
+                      <CheckCircle2 size={16} /> Solución: Control de Stock Inteligente
+                    </div>
+                  </div>
+
+                  {/* MICRO-UI */}
+                  <div className="w-full md:w-64 bg-[#0f172a] rounded-xl border border-white/10 p-4 shadow-xl">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-xs text-slate-500 font-mono">REPORTE SEMANAL</span>
+                      <BarChart3 size={14} className="text-slate-500" />
+                    </div>
+                    <div className="flex items-end gap-2 h-20 mb-2 px-2 border-b border-white/5">
+                      <div className="w-1/4 h-[80%] bg-red-500/50 rounded-t-sm relative group-hover:h-[40%] transition-all duration-1000 ease-out"></div>
+                      <div className="w-1/4 h-[40%] bg-emerald-500/50 rounded-t-sm relative group-hover:h-[90%] transition-all duration-1000 ease-out delay-100"></div>
+                      <div className="w-1/4 h-[30%] bg-blue-500/50 rounded-t-sm group-hover:h-[50%] transition-all duration-1000 ease-out delay-200"></div>
+                      <div className="w-1/4 h-[50%] bg-purple-500/50 rounded-t-sm group-hover:h-[70%] transition-all duration-1000 ease-out delay-300"></div>
+                    </div>
+                    <div className="text-[10px] text-slate-400 text-center mt-2">
+                      Detectamos fuga de $3,000.
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Reveal>
           </div>
 
-          {/* TARJETA 2: ATENCIÓN (CORREGIDA: Agregada línea de solución) */}
-          <div className="bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-orange-500/30 transition-all group flex flex-col relative overflow-hidden">
-             <div className="absolute bottom-0 left-0 p-20 bg-orange-500/10 blur-[60px] rounded-full -z-10" />
-            <div className="inline-block px-3 py-1 bg-orange-500/10 text-orange-400 rounded-lg text-xs font-bold mb-4 w-fit">PROBLEMA: CAOS</div>
-            <h3 className="text-xl font-bold mb-3">Mala Atención al Cliente</h3>
-            <p className="text-slate-400 text-sm mb-6 flex-1">
-              Clientes esperando sin saber su turno, pedidos perdidos o mala comunicación. Un cliente enojado no vuelve.
-            </p>
-            
-            {/* --- CORRECCIÓN: LÍNEA DE SOLUCIÓN AGREGADA --- */}
-            <div className="text-emerald-400 font-bold text-sm flex items-center gap-2 mb-6">
-               <CheckCircle2 size={16} /> Solución: Pantallas de Turno
-            </div>
-
-            <div className="mt-auto">
-               <div className="flex items-center justify-between bg-black/40 p-3 rounded-lg border border-white/5">
-                  <div className="flex items-center gap-3">
-                     <Users size={16} className="text-orange-400" />
-                     <div>
+          {/* TARJETA 2: CAOS / ATENCIÓN (Antes Pollos) */}
+          <div className="h-full">
+            <Reveal width="100%" delay={0.2}>
+              <div className="h-full bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-orange-500/30 transition-all group flex flex-col relative overflow-hidden">
+                <div className="absolute bottom-0 left-0 p-20 bg-orange-500/10 blur-[60px] rounded-full -z-10" />
+                <div className="inline-block px-3 py-1 bg-orange-500/10 text-orange-400 rounded-lg text-xs font-bold mb-4 w-fit">PROBLEMA: CAOS</div>
+                <h3 className="text-xl font-bold mb-3">Mala Atención</h3>
+                <p className="text-slate-400 text-sm mb-6 flex-1">
+                  Clientes esperando sin saber su turno, pedidos perdidos o mala comunicación. Un cliente enojado no vuelve.
+                </p>
+                <div className="text-emerald-400 font-bold text-sm flex items-center gap-2 mb-6">
+                  <CheckCircle2 size={16} /> Solución: Pantallas de Turno
+                </div>
+                <div className="mt-auto">
+                  <div className="flex items-center justify-between bg-black/40 p-3 rounded-lg border border-white/5">
+                    <div className="flex items-center gap-3">
+                      <Users size={16} className="text-orange-400" />
+                      <div>
                         <div className="text-[10px] text-slate-500 uppercase">En Espera</div>
                         <div className="text-lg font-bold text-white">0 Personas</div>
-                     </div>
+                      </div>
+                    </div>
+                    <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.8)]"></div>
                   </div>
-                  <div className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]"></div>
-               </div>
-              <p className="text-center text-xs text-slate-500 mt-2">Flujo de servicio optimizado.</p>
-            </div>
-          </div>
-
-          {/* TARJETA 3: IMAGEN (CORREGIDA: Agregada línea de solución) */}
-          <div className="bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-blue-500/30 transition-all group flex flex-col relative overflow-hidden">
-             <div className="absolute top-0 right-0 p-20 bg-blue-500/10 blur-[60px] rounded-full -z-10" />
-            <div className="inline-block px-3 py-1 bg-blue-500/10 text-blue-400 rounded-lg text-xs font-bold mb-4 w-fit">PROBLEMA: DESCONFIANZA</div>
-            <h3 className="text-xl font-bold mb-3">Perder Clientes Grandes</h3>
-            <p className="text-slate-400 text-sm mb-6 flex-1">
-              Eres bueno en lo que haces, pero tu imagen no lo refleja. Las empresas pagan más a quien se ve profesional.
-            </p>
-
-            {/* --- CORRECCIÓN: LÍNEA DE SOLUCIÓN AGREGADA --- */}
-            <div className="text-emerald-400 font-bold text-sm flex items-center gap-2 mb-6">
-               <CheckCircle2 size={16} /> Solución: Sitio Web Profesional
-            </div>
-            
-            {/* Micro-UI: Botón de Conversión */}
-            <div className="mt-auto bg-white/5 p-4 rounded-xl border border-white/10 text-center group-hover:bg-white/10 transition-colors">
-               <div className="text-xs text-slate-300 mb-2">Tu Web Trabajando 24/7</div>
-               <button className="w-full py-2 bg-blue-600 text-white text-[10px] font-bold rounded shadow-lg flex items-center justify-center gap-2">
-                  <MousePointerClick size={12} />
-                  Solicitar Cotización
-               </button>
-            </div>
-          </div>
-
-          {/* TARJETA 4: DEPENDENCIA */}
-          <div className="md:col-span-2 bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-purple-500/30 transition-all group overflow-hidden relative">
-             <div className="absolute bottom-0 left-0 p-32 bg-purple-500/10 blur-[80px] rounded-full -z-10" />
-            <div className="flex flex-col md:flex-row-reverse gap-8 items-center">
-              <div className="flex-1">
-                <div className="inline-block px-3 py-1 bg-purple-500/10 text-purple-400 rounded-lg text-xs font-bold mb-4">PROBLEMA: DEPENDENCIA</div>
-                <h3 className="text-2xl font-bold mb-3">"El negocio soy yo"</h3>
-                <p className="text-slate-400 text-sm leading-relaxed mb-6">
-                  Si tú no estás, nadie sabe qué cobrar, qué pedir o qué hacer. Vives atado a tu teléfono y a tu libreta.
-                </p>
-                <div className="text-emerald-400 font-bold text-sm flex items-center gap-2">
-                  <CheckCircle2 size={16} /> Solución: Tu negocio en la Nube (Autónomo)
+                  <p className="text-center text-xs text-slate-500 mt-2">Flujo de servicio optimizado.</p>
                 </div>
               </div>
-               
-               {/* MICRO-UI: Libertad Operativa */}
-               <div className="w-full md:w-64 relative">
-                  <div className="relative bg-[#0f172a] rounded-xl border border-purple-500/30 p-4 shadow-2xl z-10">
-                     <div className="flex justify-between items-center mb-4 border-b border-white/5 pb-2">
-                        <span className="text-xs font-bold text-white">ESTADO DEL NEGOCIO</span>
-                        <div className="px-2 py-0.5 bg-green-500/20 text-green-400 text-[8px] font-bold rounded uppercase">Online</div>
-                     </div>
-                     <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                           <div className="p-1.5 bg-blue-500/20 rounded text-blue-400"><Layers size={12}/></div>
-                           <div className="flex-1">
-                              <div className="text-[10px] text-slate-400">Ventas de Hoy</div>
-                              <div className="text-xs font-bold text-white">$12,450.00</div>
-                           </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                           <div className="p-1.5 bg-purple-500/20 rounded text-purple-400"><Users size={12}/></div>
-                           <div className="flex-1">
-                              <div className="text-[10px] text-slate-400">Personal Activo</div>
-                              <div className="text-xs font-bold text-white">4 Empleados</div>
-                           </div>
-                        </div>
-                     </div>
-                     <div className="mt-3 text-[10px] text-slate-500 text-center italic">
-                        Tú estás descansando. Tu sistema trabaja.
-                     </div>
+            </Reveal>
+          </div>
+
+          {/* TARJETA 3: IMAGEN (Universal) */}
+          <div className="h-full">
+            <Reveal width="100%">
+              <div className="h-full bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-blue-500/30 transition-all group flex flex-col relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-20 bg-blue-500/10 blur-[60px] rounded-full -z-10" />
+                <div className="inline-block px-3 py-1 bg-blue-500/10 text-blue-400 rounded-lg text-xs font-bold mb-4 w-fit">PROBLEMA: DESCONFIANZA</div>
+                <h3 className="text-xl font-bold mb-3">Perder Clientes</h3>
+                <p className="text-slate-400 text-sm mb-6 flex-1">
+                  Eres bueno en lo que haces, pero tu imagen no lo refleja. Las empresas pagan más a quien se ve profesional.
+                </p>
+                <div className="text-emerald-400 font-bold text-sm flex items-center gap-2 mb-6">
+                  <CheckCircle2 size={16} /> Solución: Web Profesional
+                </div>
+                <div className="mt-auto bg-white/5 p-4 rounded-xl border border-white/10 text-center group-hover:bg-white/10 transition-colors">
+                  <div className="text-xs text-slate-300 mb-2">Tu Web Trabajando 24/7</div>
+                  <button className="w-full py-2 bg-blue-600 text-white text-[10px] font-bold rounded shadow-lg flex items-center justify-center gap-2 transform group-hover:scale-105 transition-transform">
+                    <MousePointerClick size={12} />
+                    Solicitar Cotización
+                  </button>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+
+          {/* TARJETA 4: DEPENDENCIA (Antes Papeles) */}
+          <div className="md:col-span-2">
+            <Reveal width="100%" delay={0.2}>
+              <div className="h-full bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-purple-500/30 transition-all group overflow-hidden relative">
+                <div className="absolute bottom-0 left-0 p-32 bg-purple-500/10 blur-[80px] rounded-full -z-10" />
+                <div className="flex flex-col md:flex-row-reverse gap-8 items-center">
+                  <div className="flex-1">
+                    <div className="inline-block px-3 py-1 bg-purple-500/10 text-purple-400 rounded-lg text-xs font-bold mb-4">PROBLEMA: DEPENDENCIA</div>
+                    <h3 className="text-2xl font-bold mb-3">"El negocio soy yo"</h3>
+                    <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                      Si tú no estás, nadie sabe qué cobrar, qué pedir o qué hacer. Vives atado a tu teléfono.
+                    </p>
+                    <div className="text-emerald-400 font-bold text-sm flex items-center gap-2">
+                      <CheckCircle2 size={16} /> Solución: Tu negocio en la Nube (Autónomo)
+                    </div>
                   </div>
-               </div>
-            </div>
+
+                  {/* MICRO-UI ANIMADA */}
+                  <div className="w-full md:w-64 relative">
+                    <div className="relative bg-[#0f172a] rounded-xl border border-purple-500/30 p-4 shadow-2xl z-10">
+                      <div className="flex justify-between items-center mb-4 border-b border-white/5 pb-2">
+                        <span className="text-xs font-bold text-white">ESTADO DEL NEGOCIO</span>
+                        <div className="px-2 py-0.5 bg-green-500/20 text-green-400 text-[8px] font-bold rounded uppercase animate-pulse">Online</div>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-1.5 bg-blue-500/20 rounded text-blue-400"><Layers size={12} /></div>
+                          <div className="flex-1">
+                            <div className="text-[10px] text-slate-400">Ventas de Hoy</div>
+                            <div className="text-xs font-bold text-white">$12,450.00</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="p-1.5 bg-purple-500/20 rounded text-purple-400"><Users size={12} /></div>
+                          <div className="flex-1">
+                            <div className="text-[10px] text-slate-400">Personal Activo</div>
+                            <div className="text-xs font-bold text-white">4 Empleados</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-3 text-[10px] text-slate-500 text-center italic">
+                        Tú estás descansando. Tu sistema trabaja.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
           </div>
 
         </div>
       </section>
 
-      {/* --- RESTO DE SECCIONES --- */}
-      <HowItWorks />
-      <Testimonials />
-      <About />
+      {/* --- SECCIONES FINALES (TAMBIÉN ANIMADAS) --- */}
+      <Reveal width="100%">
+        <HowItWorks />
+      </Reveal>
+
+      <Reveal width="100%">
+        <Testimonials />
+      </Reveal>
+
+      <Reveal width="100%">
+        <About />
+      </Reveal>
+
       <Footer />
     </main>
   );
