@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState } from 'react';
 
 interface Props {
     children: React.ReactNode;
@@ -38,11 +38,24 @@ export default function SpotlightCard({
             onMouseMove={handleMouseMove}
             onMouseEnter={handleFocus}
             onMouseLeave={handleBlur}
-            className={`relative overflow-hidden rounded-3xl border border-white/10 bg-[#1e293b]/50 ${className}`}
+            // Agregamos 'active:scale-[0.98]' para que en móvil se sienta táctil al tocar
+            className={`relative overflow-hidden rounded-3xl border border-white/10 bg-[#1e293b]/50 transition-transform active:scale-[0.98] duration-200 ${className}`}
         >
-            {/* El efecto de luz (Spotlight) */}
+            {/* --- CAPA 1: LUZ AMBIENTAL (SOLO MÓVIL) --- */}
+            {/* Esta capa es visible siempre en móvil (block) y se oculta en desktop (md:hidden).
+          Crea un brillo fijo en la parte superior para que la tarjeta no se vea plana. */}
             <div
-                className="pointer-events-none absolute -inset-px opacity-0 transition duration-300"
+                className="pointer-events-none absolute inset-0 md:hidden"
+                style={{
+                    background: `radial-gradient(circle at 50% -20%, ${spotlightColor}, transparent 70%)`,
+                    opacity: 0.6 // Brillo sutil permanente
+                }}
+            />
+
+            {/* --- CAPA 2: SPOTLIGHT INTERACTIVO (SOLO DESKTOP) --- */}
+            {/* Esta capa sigue al mouse. En móvil no hace falta porque tenemos la Capa 1. */}
+            <div
+                className="pointer-events-none absolute -inset-px opacity-0 transition duration-300 hidden md:block"
                 style={{
                     opacity,
                     background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, ${spotlightColor}, transparent 40%)`,
@@ -50,7 +63,7 @@ export default function SpotlightCard({
             />
 
             {/* Contenido Real */}
-            <div className="relative h-full">{children}</div>
+            <div className="relative h-full z-10">{children}</div>
         </div>
     );
 }
