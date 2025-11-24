@@ -24,24 +24,28 @@ export default function Home() {
 
       {/* --- HERO SECTION --- */}
       <section className="relative h-screen w-full flex flex-col items-center justify-center">
-        <div className="absolute top-8 left-8 md:top-12 md:left-12 z-30 font-bold text-xl tracking-tight hidden md:block">
-          KEVIN<span className="text-blue-500">CONSULTING</span>
-        </div>
+
+        {/* NOTA: Se eliminó el div del Logo duplicado aquí para limpiar la vista en PC */}
 
         <div className="absolute inset-0 z-0">
-          {/* Dither: false ayuda al rendimiento en pantallas de alta resolución */}
-          <Canvas camera={{ position: [0, 0, 50], fov: 50 }} dpr={[1, 2]} gl={{ antialias: false }}>
+          {/* Configuración gráfica optimizada para Retina pero con muchas partículas */}
+          <Canvas
+            camera={{ position: [0, 0, 50], fov: 50 }}
+            dpr={[1, 1.5]}
+            gl={{ antialias: false, powerPreference: "high-performance" }}
+          >
             <ambientLight intensity={0.5} />
             <pointLight position={[10, 10, 10]} color="#3b82f6" />
             <Suspense fallback={null}>
-              {/* --- OPTIMIZACIÓN CRÍTICA: Bajamos a 400 para fluidez total --- */}
-              <Particles count={400} />
+              {/* SOLICITAMOS 2000 PARTÍCULAS (El componente Particles se encargará de bajarlo en móvil) */}
+              <Particles count={2000} />
             </Suspense>
           </Canvas>
           <div className="absolute inset-0 bg-gradient-to-b from-[#0f172a]/50 via-[#0f172a]/80 to-[#0f172a] z-10" />
         </div>
 
-        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto">
+        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">
+
           <Reveal>
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
               Tu negocio tiene potencial.
@@ -84,7 +88,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-          {/* TARJETA 1 */}
+          {/* TARJETA 1: INVENTARIO */}
           <div className="md:col-span-2">
             <Reveal width="100%">
               <div className="h-full bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-blue-500/30 transition-all group overflow-hidden relative">
@@ -111,14 +115,16 @@ export default function Home() {
                       <div className="w-1/4 h-[30%] bg-blue-500/50 rounded-t-sm group-hover:h-[50%] transition-all duration-1000 ease-out delay-200"></div>
                       <div className="w-1/4 h-[50%] bg-purple-500/50 rounded-t-sm group-hover:h-[70%] transition-all duration-1000 ease-out delay-300"></div>
                     </div>
-                    <div className="text-[10px] text-slate-400 text-center mt-2">Detectamos fuga de $3,000.</div>
+                    <div className="text-[10px] text-slate-400 text-center mt-2">
+                      Detectamos fuga de $3,000.
+                    </div>
                   </div>
                 </div>
               </div>
             </Reveal>
           </div>
 
-          {/* TARJETA 2 */}
+          {/* TARJETA 2: ATENCIÓN */}
           <div className="h-full">
             <Reveal width="100%" delay={0.2}>
               <div className="h-full bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-orange-500/30 transition-all group flex flex-col relative overflow-hidden">
@@ -148,7 +154,7 @@ export default function Home() {
             </Reveal>
           </div>
 
-          {/* TARJETA 3 */}
+          {/* TARJETA 3: IMAGEN */}
           <div className="h-full">
             <Reveal width="100%">
               <div className="h-full bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-blue-500/30 transition-all group flex flex-col relative overflow-hidden">
@@ -172,7 +178,7 @@ export default function Home() {
             </Reveal>
           </div>
 
-          {/* TARJETA 4 */}
+          {/* TARJETA 4: DEPENDENCIA */}
           <div className="md:col-span-2">
             <Reveal width="100%" delay={0.2}>
               <div className="h-full bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-purple-500/30 transition-all group overflow-hidden relative">
