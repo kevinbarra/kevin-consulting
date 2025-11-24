@@ -9,7 +9,7 @@ import About from '@/components/sections/About';
 import Testimonials from '@/components/sections/Testimonials';
 import Footer from '@/components/layout/Footer';
 import Reveal from '@/components/layout/Reveal';
-import SpotlightCard from '@/components/layout/SpotlightCard'; // <--- IMPORTACIÓN NUEVA
+import SpotlightCard from '@/components/layout/SpotlightCard';
 
 export default function Home() {
 
@@ -25,11 +25,11 @@ export default function Home() {
 
       {/* --- HERO SECTION --- */}
       <section className="relative h-screen w-full flex flex-col items-center justify-center">
-        <div className="absolute top-8 left-8 md:top-12 md:left-12 z-30 font-bold text-xl tracking-tight hidden md:block">
-          KEVIN<span className="text-blue-500">CONSULTING</span>
-        </div>
+
+        {/* CORRECCIÓN 1: Eliminado el div del Logo duplicado aquí. */}
 
         <div className="absolute inset-0 z-0">
+          {/* CORRECCIÓN 2: Configuración de Alto Rendimiento restaurada */}
           <Canvas
             camera={{ position: [0, 0, 50], fov: 50 }}
             dpr={[1, 1.5]}
@@ -38,13 +38,15 @@ export default function Home() {
             <ambientLight intensity={0.5} />
             <pointLight position={[10, 10, 10]} color="#3b82f6" />
             <Suspense fallback={null}>
-              <Particles count={2000} />
+              {/* CORRECCIÓN 3: Regresamos a 400 para eliminar el LAG. */}
+              <Particles count={400} />
             </Suspense>
           </Canvas>
           <div className="absolute inset-0 bg-gradient-to-b from-[#0f172a]/50 via-[#0f172a]/80 to-[#0f172a] z-10" />
         </div>
 
-        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto">
+        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">
+
           <Reveal>
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
               Tu negocio tiene potencial.
@@ -55,13 +57,13 @@ export default function Home() {
           </Reveal>
 
           <Reveal delay={0.2}>
-            <p className="text-slate-300 text-lg md:text-2xl max-w-2xl mx-auto mb-10 leading-relaxed font-light">
+            <p className="text-slate-300 text-lg md:text-2xl max-w-2xl mx-auto mb-10 leading-relaxed font-light text-center">
               Olvídate del papel y el caos. Creamos el sistema exacto que necesitas para controlar tus inventarios, citas y ventas sin complicarte la vida.
             </p>
           </Reveal>
 
           <Reveal delay={0.4}>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
               <button
                 onClick={scrollToSolutions}
                 className="group px-8 py-4 bg-blue-600 hover:bg-blue-700 rounded-full font-bold transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-3 text-lg"
@@ -74,7 +76,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- SECCIÓN SOLUCIONES (AHORA CON SPOTLIGHT) --- */}
+      {/* --- SECCIÓN SOLUCIONES (CON SPOTLIGHT) --- */}
       <section id="soluciones" className="relative z-20 py-24 px-6 md:px-10 max-w-7xl mx-auto">
         <div className="text-center mb-16 flex flex-col items-center">
           <Reveal>
@@ -90,7 +92,6 @@ export default function Home() {
           {/* TARJETA 1: INVENTARIO */}
           <div className="md:col-span-2">
             <Reveal width="100%">
-              {/* Usamos SpotlightCard en lugar de div normal */}
               <SpotlightCard className="h-full p-8 group">
                 <div className="absolute top-0 right-0 p-32 bg-blue-500/10 blur-[80px] rounded-full -z-10" />
                 <div className="flex flex-col md:flex-row gap-8 items-center relative z-10">

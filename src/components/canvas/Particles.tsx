@@ -13,21 +13,18 @@ type ParticleData = {
   z: number;
 };
 
-// El valor default ahora es 2000 (para PC)
-const Particles = ({ count = 2000 }) => {
+const Particles = ({ count = 400 }) => { // Default base bajo
   const mesh = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
   const [data, setData] = useState<ParticleData[]>([]);
 
   useEffect(() => {
-    // Detección de pantalla móvil
+    // DETECCIÓN DE MÓVIL
     const isMobile = window.innerWidth < 768;
 
-    // CALIBRACIÓN DE RENDIMIENTO:
-    // Si es móvil, usamos solo el 15% de las partículas solicitadas (ej. 300 de 2000).
-    // Esto es suficiente para que la pantalla chica se vea llena, pero no quema la batería.
-    const finalCount = isMobile ? Math.floor(count * 0.15) : count;
+    // Si es móvil, forzamos solo 100 partículas sin importar lo que pida page.tsx
+    const finalCount = isMobile ? 100 : count;
 
     const temp: ParticleData[] = [];
     for (let i = 0; i < finalCount; i++) {
@@ -73,7 +70,6 @@ const Particles = ({ count = 2000 }) => {
   });
 
   return (
-    // Aquí usamos data.length para asegurarnos de renderizar solo las calculadas (300 o 2000)
     <instancedMesh ref={mesh} args={[undefined, undefined, data.length || count]}>
       <dodecahedronGeometry args={[0.08, 0]} />
       <meshPhongMaterial color="#3b82f6" emissive="#10b981" emissiveIntensity={0.2} />
