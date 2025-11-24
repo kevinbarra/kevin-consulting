@@ -9,6 +9,7 @@ import About from '@/components/sections/About';
 import Testimonials from '@/components/sections/Testimonials';
 import Footer from '@/components/layout/Footer';
 import Reveal from '@/components/layout/Reveal';
+import SpotlightCard from '@/components/layout/SpotlightCard'; // <--- IMPORTACIÓN NUEVA
 
 export default function Home() {
 
@@ -24,11 +25,11 @@ export default function Home() {
 
       {/* --- HERO SECTION --- */}
       <section className="relative h-screen w-full flex flex-col items-center justify-center">
-
-        {/* NOTA: Se eliminó el div del Logo duplicado aquí para limpiar la vista en PC */}
+        <div className="absolute top-8 left-8 md:top-12 md:left-12 z-30 font-bold text-xl tracking-tight hidden md:block">
+          KEVIN<span className="text-blue-500">CONSULTING</span>
+        </div>
 
         <div className="absolute inset-0 z-0">
-          {/* Configuración gráfica optimizada para Retina pero con muchas partículas */}
           <Canvas
             camera={{ position: [0, 0, 50], fov: 50 }}
             dpr={[1, 1.5]}
@@ -37,15 +38,13 @@ export default function Home() {
             <ambientLight intensity={0.5} />
             <pointLight position={[10, 10, 10]} color="#3b82f6" />
             <Suspense fallback={null}>
-              {/* SOLICITAMOS 2000 PARTÍCULAS (El componente Particles se encargará de bajarlo en móvil) */}
               <Particles count={2000} />
             </Suspense>
           </Canvas>
           <div className="absolute inset-0 bg-gradient-to-b from-[#0f172a]/50 via-[#0f172a]/80 to-[#0f172a] z-10" />
         </div>
 
-        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">
-
+        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto">
           <Reveal>
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
               Tu negocio tiene potencial.
@@ -75,7 +74,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- SECCIÓN SOLUCIONES --- */}
+      {/* --- SECCIÓN SOLUCIONES (AHORA CON SPOTLIGHT) --- */}
       <section id="soluciones" className="relative z-20 py-24 px-6 md:px-10 max-w-7xl mx-auto">
         <div className="text-center mb-16 flex flex-col items-center">
           <Reveal>
@@ -91,9 +90,10 @@ export default function Home() {
           {/* TARJETA 1: INVENTARIO */}
           <div className="md:col-span-2">
             <Reveal width="100%">
-              <div className="h-full bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-blue-500/30 transition-all group overflow-hidden relative">
+              {/* Usamos SpotlightCard en lugar de div normal */}
+              <SpotlightCard className="h-full p-8 group">
                 <div className="absolute top-0 right-0 p-32 bg-blue-500/10 blur-[80px] rounded-full -z-10" />
-                <div className="flex flex-col md:flex-row gap-8 items-center">
+                <div className="flex flex-col md:flex-row gap-8 items-center relative z-10">
                   <div className="flex-1">
                     <div className="inline-block px-3 py-1 bg-red-500/10 text-red-400 rounded-lg text-xs font-bold mb-4">PROBLEMA: FUGA DE DINERO</div>
                     <h3 className="text-2xl font-bold mb-3">"Compro mucho y vendo poco"</h3>
@@ -120,14 +120,14 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </SpotlightCard>
             </Reveal>
           </div>
 
           {/* TARJETA 2: ATENCIÓN */}
           <div className="h-full">
             <Reveal width="100%" delay={0.2}>
-              <div className="h-full bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-orange-500/30 transition-all group flex flex-col relative overflow-hidden">
+              <SpotlightCard className="h-full p-8 group flex flex-col" spotlightColor="rgba(249, 115, 22, 0.2)">
                 <div className="absolute bottom-0 left-0 p-20 bg-orange-500/10 blur-[60px] rounded-full -z-10" />
                 <div className="inline-block px-3 py-1 bg-orange-500/10 text-orange-400 rounded-lg text-xs font-bold mb-4 w-fit">PROBLEMA: CAOS</div>
                 <h3 className="text-xl font-bold mb-3">Mala Atención</h3>
@@ -150,14 +150,14 @@ export default function Home() {
                   </div>
                   <p className="text-center text-xs text-slate-500 mt-2">Flujo de servicio optimizado.</p>
                 </div>
-              </div>
+              </SpotlightCard>
             </Reveal>
           </div>
 
           {/* TARJETA 3: IMAGEN */}
           <div className="h-full">
             <Reveal width="100%">
-              <div className="h-full bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-blue-500/30 transition-all group flex flex-col relative overflow-hidden">
+              <SpotlightCard className="h-full p-8 group flex flex-col" spotlightColor="rgba(59, 130, 246, 0.2)">
                 <div className="absolute top-0 right-0 p-20 bg-blue-500/10 blur-[60px] rounded-full -z-10" />
                 <div className="inline-block px-3 py-1 bg-blue-500/10 text-blue-400 rounded-lg text-xs font-bold mb-4 w-fit">PROBLEMA: DESCONFIANZA</div>
                 <h3 className="text-xl font-bold mb-3">Perder Clientes</h3>
@@ -174,16 +174,16 @@ export default function Home() {
                     Solicitar Cotización
                   </button>
                 </div>
-              </div>
+              </SpotlightCard>
             </Reveal>
           </div>
 
           {/* TARJETA 4: DEPENDENCIA */}
           <div className="md:col-span-2">
             <Reveal width="100%" delay={0.2}>
-              <div className="h-full bg-[#1e293b]/50 border border-white/10 rounded-3xl p-8 hover:border-purple-500/30 transition-all group overflow-hidden relative">
+              <SpotlightCard className="h-full p-8 group" spotlightColor="rgba(168, 85, 247, 0.2)">
                 <div className="absolute bottom-0 left-0 p-32 bg-purple-500/10 blur-[80px] rounded-full -z-10" />
-                <div className="flex flex-col md:flex-row-reverse gap-8 items-center">
+                <div className="flex flex-col md:flex-row-reverse gap-8 items-center relative z-10">
                   <div className="flex-1">
                     <div className="inline-block px-3 py-1 bg-purple-500/10 text-purple-400 rounded-lg text-xs font-bold mb-4">PROBLEMA: DEPENDENCIA</div>
                     <h3 className="text-2xl font-bold mb-3">"El negocio soy yo"</h3>
@@ -194,6 +194,7 @@ export default function Home() {
                       <CheckCircle2 size={16} /> Solución: Tu negocio en la Nube (Autónomo)
                     </div>
                   </div>
+
                   <div className="w-full md:w-64 relative">
                     <div className="relative bg-[#0f172a] rounded-xl border border-purple-500/30 p-4 shadow-2xl z-10 overflow-hidden">
                       <div className="absolute top-0 -left-[100%] w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_3s_infinite]"></div>
@@ -223,7 +224,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </SpotlightCard>
             </Reveal>
           </div>
 

@@ -14,5 +14,26 @@ html {
 
 /* Ajuste para que el scroll respete la barra de navegación fija */
 section {
-  scroll-margin-top: 100px; /* Deja un espacio arriba para que el Navbar no tape el título */
+  scroll-margin-top: 100px;
+  /* Deja un espacio arriba para que el Navbar no tape el título */
+}
+
+/* --- Custom Scrollbar (0.1% Detail) --- */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+  /* Mismo color que el fondo */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  /* Gris oscuro sutil */
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }
