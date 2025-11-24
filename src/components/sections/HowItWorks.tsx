@@ -34,19 +34,16 @@ const steps = [
 ];
 
 export default function HowItWorks() {
-  // --- CALIBRACIÓN FINAL (RITMO LENTO Y ELEGANTE) ---
-  const RAY_SPEED = 5; // Aumentado a 5s para mayor elegancia
-  const PAUSE = 2;     // 2 segundos de descanso entre ciclos
-
-  // Ajuste fino de cuándo se prende cada luz (0.0 a 1.0 del tiempo de viaje)
-  // 0.38 sigue siendo el punto dulce visual para el paso 2
+  const RAY_SPEED = 5;
+  const PAUSE = 2;
   const TIMING = [0, 0.38, 0.85];
 
   return (
     <section id="proceso" className="py-24 relative overflow-hidden">
 
-      {/* Fondo sutil decorativo */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-[500px] bg-blue-600/5 blur-[120px] rounded-full -z-10" />
+      {/* --- OPTIMIZACIÓN DE RENDIMIENTO --- */}
+      {/* Reemplazamos el 'blur-[120px]' (pesado) por un gradiente radial (ligero) */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-[500px] bg-[radial-gradient(circle,rgba(37,99,235,0.1)_0%,rgba(0,0,0,0)_70%)] -z-10" />
 
       <div className="max-w-7xl mx-auto px-6 md:px-10">
 
@@ -67,8 +64,8 @@ export default function HowItWorks() {
             className="md:hidden absolute top-0 left-1/2 w-0.5 bg-gradient-to-b from-transparent via-blue-400 to-transparent -translate-x-1/2 z-0"
             initial={{ top: "-10%", opacity: 0 }}
             whileInView={{
-              top: "110%", // Viaja de arriba a abajo completo
-              opacity: [0, 1, 1, 0] // Aparece y desaparece al final
+              top: "110%",
+              opacity: [0, 1, 1, 0]
             }}
             transition={{
               duration: RAY_SPEED,
@@ -86,8 +83,8 @@ export default function HowItWorks() {
             className="hidden md:block absolute top-12 left-[16%] h-0.5 bg-gradient-to-r from-transparent via-blue-500 to-transparent rounded-full shadow-[0_0_15px_rgba(59,130,246,0.8)] z-0"
             initial={{ width: "0%", left: "16%", opacity: 0 }}
             whileInView={{
-              width: ["0%", "20%", "0%"], // El rayo se estira y encoge
-              left: ["16%", "40%", "84%"], // Viaja de izq a der
+              width: ["0%", "20%", "0%"],
+              left: ["16%", "40%", "84%"],
               opacity: [0, 1, 1, 0]
             }}
             transition={{
@@ -104,10 +101,9 @@ export default function HowItWorks() {
               {/* Círculo Principal */}
               <motion.div
                 className="w-24 h-24 bg-[#0f172a] border border-white/10 rounded-full flex items-center justify-center relative z-10"
-                // Animación de "Impacto"
                 animate={{
                   borderColor: ["rgba(255,255,255,0.1)", step.borderColor.replace("group-hover:", ""), "rgba(255,255,255,0.1)"],
-                  scale: [1, 1.1, 1], // Pop más sutil (1.1) para ir acorde a la velocidad lenta
+                  scale: [1, 1.1, 1],
                   boxShadow: ["0 0 0 rgba(0,0,0,0)", `0 0 30px ${step.color === 'blue' ? 'rgba(14,165,233,0.4)' : step.color === 'purple' ? 'rgba(168,85,247,0.4)' : 'rgba(16,185,129,0.4)'}`, "0 0 0 rgba(0,0,0,0)"]
                 }}
                 transition={{
@@ -115,7 +111,7 @@ export default function HowItWorks() {
                   repeat: Infinity,
                   delay: (RAY_SPEED * TIMING[index]),
                   repeatDelay: PAUSE,
-                  times: [0, 0.1, 0.3], // El brillo dura un poco más para que se note
+                  times: [0, 0.1, 0.3],
                   ease: "easeOut"
                 }}
               >

@@ -35,13 +35,13 @@ const testimonials = [
 export default function Testimonials() {
   return (
     <section className="py-24 px-6 bg-[#0f172a] relative overflow-hidden">
-      
-      {/* Elementos decorativos de fondo */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-600/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto">
-        
+      {/* --- OPTIMIZACIÓN: Gradientes ligeros en lugar de Blur --- */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(37,99,235,0.05)_0%,rgba(0,0,0,0)_70%)] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(147,51,234,0.05)_0%,rgba(0,0,0,0)_70%)] pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto relative z-10">
+
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Resultados que pagan tu inversión</h2>
           <p className="text-slate-400">No confíes en nuestra palabra. Confía en sus números.</p>
@@ -50,7 +50,7 @@ export default function Testimonials() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {testimonials.map((t) => (
             <div key={t.id} className="bg-[#1e293b]/40 border border-white/5 rounded-2xl p-8 hover:bg-[#1e293b]/60 transition-colors relative group">
-              
+
               {/* Comillas decorativas */}
               <Quote className="absolute top-6 right-6 text-white/5 w-10 h-10 group-hover:text-white/10 transition-colors" />
 
