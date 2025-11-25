@@ -1,59 +1,64 @@
 'use client';
 
-import { MessageCircle } from 'lucide-react';
+import Image from 'next/image';
+import { MessageCircle } from 'lucide-react'; // Cambiamos iconos de redes por botón de contacto si se desea, o lo dejamos limpio
+import SpotlightCard from '../layout/SpotlightCard';
 
 export default function About() {
-  return (
-    <section id="contacto" className="py-24 px-6 bg-[#0b1121] border-y border-white/5 relative">
-      <div className="max-w-4xl mx-auto text-center">
-          
-          {/* FOTO DE PERFIL / AVATAR */}
-          <div className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full p-1 mb-6 shadow-2xl shadow-blue-500/20">
-             <div className="w-full h-full bg-[#0f172a] rounded-full flex items-center justify-center text-3xl">
-                👨‍💻
-             </div>
-          </div>
+   return (
+      <section id="nosotros" className="py-24 relative overflow-hidden">
+         <div className="max-w-5xl mx-auto px-6 md:px-10">
+            <SpotlightCard className="p-8 md:p-12 bg-[#0f172a]/50 border-white/5" spotlightColor="rgba(59, 130, 246, 0.15)">
+               <div className="flex flex-col md:flex-row gap-10 md:gap-16 items-center">
 
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">
-             Ingeniería experta.<br/>
-             <span className="text-blue-500">Trato directo.</span>
-          </h2>
-          
-          <p className="text-slate-400 text-lg mb-8 leading-relaxed max-w-2xl mx-auto">
-             Hola, soy <strong>Kevin</strong>. Ingeniero en Sistemas. <br/>
-             A diferencia de las agencias donde eres un número más, yo me involucro personalmente. Analizo tu negocio, entiendo tus dolores y programo la solución exacta.
-          </p>
+                  {/* --- FOTO DEL FUNDADOR --- */}
+                  <div className="shrink-0 relative group">
+                     {/* Efecto de halo/brillo detrás de la foto */}
+                     <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto mb-10">
-             <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-                <div className="font-bold text-white text-xl">100%</div>
-                <div className="text-xs text-slate-400">A la Medida</div>
-             </div>
-             <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-                <div className="font-bold text-white text-xl">24/7</div>
-                <div className="text-xs text-slate-400">Soporte Directo</div>
-             </div>
-             <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-                <div className="font-bold text-white text-xl">ROI</div>
-                <div className="text-xs text-slate-400">Enfocado en Ganancias</div>
-             </div>
-          </div>
+                     {/* Contenedor de la imagen */}
+                     <div className="relative w-48 h-48 md:w-64 md:h-64 rounded-3xl overflow-hidden border-2 border-white/10 shadow-2xl rotate-3 group-hover:rotate-0 transition-transform duration-500">
+                        <Image
+                           src="/kevin.jpg" // <--- ASEGÚRATE DE RENOMBRAR TU FOTO A 'kevin.jpg' EN LA CARPETA PUBLIC
+                           alt="Kevin Barra - Fundador"
+                           fill
+                           className="object-cover"
+                           sizes="(max-width: 768px) 192px, 256px"
+                           priority
+                        />
+                     </div>
+                  </div>
 
-          <button 
-            onClick={() => {
-                // CAMBIA ESTO POR TU NÚMERO REAL
-                const telefono = "522291589149"; 
-                const mensaje = "Hola Kevin, vi tu página web y quiero analizar mi negocio.";
-                const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
-                window.open(url, '_blank');
-            }}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-[#25D366] hover:bg-[#1ebc57] text-white font-bold rounded-full transition-all shadow-lg shadow-green-500/20 transform hover:scale-105"
-          >
-             <MessageCircle size={20} />
-             Enviar WhatsApp Directo
-          </button>
-          <p className="mt-4 text-xs text-slate-500">Respuesta promedio: Menos de 1 hora.</p>
-      </div>
-    </section>
-  );
+                  {/* --- TEXTO "CARTA DEL FUNDADOR" --- */}
+                  <div className="flex-1 text-left">
+                     <div className="inline-block px-3 py-1 bg-blue-500/10 text-blue-400 rounded-full text-sm font-bold mb-4">
+                        Una nota del fundador
+                     </div>
+                     <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight">
+                        No soy una agencia. <br className="hidden md:block" /> Soy tu socio tecnológico.
+                     </h2>
+                     <div className="space-y-4 text-slate-300 leading-relaxed">
+                        <p>
+                           Hola, soy Kevin Barra. Como ingeniero de software, he visto demasiados negocios con un potencial increíble quedarse estancados por el caos operativo o por herramientas que no entienden.
+                        </p>
+                        <p>
+                           Fundé KevinConsulting con una misión simple: traer la tecnología de las grandes empresas a tu negocio, sin la complejidad ni el costo absurdo. No te voy a vender "código"; te voy a dar **control, tiempo y paz mental**.
+                        </p>
+                        <p>
+                           Cuando trabajas conmigo, no hablas con un vendedor. Hablas directamente con quien diseña y construye tu solución. Mi compromiso es personal.
+                        </p>
+                     </div>
+
+                     {/* Firma Simple */}
+                     <div className="mt-8 border-t border-white/5 pt-6">
+                        <div className="text-white font-bold text-lg">Kevin Barra</div>
+                        <div className="text-blue-400 text-sm">Ingeniero de Software & Fundador</div>
+                     </div>
+
+                  </div>
+               </div>
+            </SpotlightCard>
+         </div>
+      </section>
+   );
 }
