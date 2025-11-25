@@ -7,7 +7,7 @@ import { ArrowRight, CheckCircle2, Star, BarChart3, Users, Layers, MousePointerC
 import HowItWorks from '@/components/sections/HowItWorks';
 import About from '@/components/sections/About';
 import Testimonials from '@/components/sections/Testimonials';
-import TechStack from '@/components/sections/TechStack'; // <--- NUEVA IMPORTACIÓN
+import TechStack from '@/components/sections/TechStack'; // Cinta de Tecnología
 import Footer from '@/components/layout/Footer';
 import Reveal from '@/components/layout/Reveal';
 import SpotlightCard from '@/components/layout/SpotlightCard';
@@ -28,13 +28,9 @@ export default function Home() {
       {/* --- HERO SECTION --- */}
       <section className="relative h-screen w-full flex flex-col items-center justify-center">
 
-        {/* Logo Tipográfico en Hero (Oculto en móvil, visible en PC para balance) */}
-        <div className="absolute top-8 left-8 md:top-12 md:left-12 z-30 font-bold text-xl tracking-tight hidden md:block">
-          KEVIN<span className="text-blue-500">CONSULTING</span>
-        </div>
+        {/* CORRECCIÓN: Aquí NO hay ningún div de logo absoluto. Está limpio. */}
 
         <div className="absolute inset-0 z-0">
-          {/* Configuración de Alto Rendimiento para evitar Lag */}
           <Canvas
             camera={{ position: [0, 0, 50], fov: 50 }}
             dpr={[1, 1.5]}
@@ -43,7 +39,6 @@ export default function Home() {
             <ambientLight intensity={0.5} />
             <pointLight position={[10, 10, 10]} color="#3b82f6" />
             <Suspense fallback={null}>
-              {/* Cantidad equilibrada para PC y Móvil */}
               <Particles count={400} />
             </Suspense>
           </Canvas>
@@ -51,7 +46,6 @@ export default function Home() {
         </div>
 
         <div className="relative z-20 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">
-
           <Reveal>
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
               Tu negocio tiene potencial.
