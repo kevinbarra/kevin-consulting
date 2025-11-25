@@ -28,12 +28,10 @@ export default function Home() {
       {/* --- HERO SECTION --- */}
       <section className="relative h-screen w-full flex flex-col items-center justify-center">
 
-        {/* Logo Tipográfico en Hero (Oculto en móvil) */}
-        <div className="absolute top-8 left-8 md:top-12 md:left-12 z-30 font-bold text-xl tracking-tight hidden md:block">
-          KEVIN<span className="text-blue-500">CONSULTING</span>
-        </div>
+        {/* LOGO DUPLICADO ELIMINADO (Solo se ve el del Navbar) */}
 
         <div className="absolute inset-0 z-0">
+          {/* Configuración optimizada para rendimiento */}
           <Canvas
             camera={{ position: [0, 0, 50], fov: 50 }}
             dpr={[1, 1.5]}
@@ -78,7 +76,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- TECH STACK --- */}
+      {/* --- TECH STACK (CINTA INFINITA) --- */}
       <Reveal width="100%" delay={0.2}>
         <TechStack />
       </Reveal>
@@ -164,7 +162,7 @@ export default function Home() {
             </Reveal>
           </div>
 
-          {/* TARJETA 3: IMAGEN (BOTÓN FUNCIONAL AQUÍ) */}
+          {/* TARJETA 3: IMAGEN (CON BOTÓN FUNCIONAL) */}
           <div className="h-full">
             <Reveal width="100%">
               <SpotlightCard className="h-full p-8 group flex flex-col" spotlightColor="rgba(59, 130, 246, 0.2)">
@@ -179,7 +177,8 @@ export default function Home() {
                 </div>
                 <div className="mt-auto bg-white/5 p-4 rounded-xl border border-white/10 text-center group-hover:bg-white/10 transition-colors relative overflow-hidden">
                   <div className="text-xs text-slate-300 mb-2">Tu Web Trabajando 24/7</div>
-                  {/* BOTÓN REAL */}
+
+                  {/* BOTÓN REAL DE WHATSAPP */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
