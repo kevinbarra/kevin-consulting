@@ -7,7 +7,7 @@ import { ArrowRight, CheckCircle2, Star, BarChart3, Users, Layers, MousePointerC
 import HowItWorks from '@/components/sections/HowItWorks';
 import About from '@/components/sections/About';
 import Testimonials from '@/components/sections/Testimonials';
-import TechStack from '@/components/sections/TechStack'; // Cinta de Tecnología
+import TechStack from '@/components/sections/TechStack';
 import Footer from '@/components/layout/Footer';
 import Reveal from '@/components/layout/Reveal';
 import SpotlightCard from '@/components/layout/SpotlightCard';
@@ -28,7 +28,10 @@ export default function Home() {
       {/* --- HERO SECTION --- */}
       <section className="relative h-screen w-full flex flex-col items-center justify-center">
 
-        {/* CORRECCIÓN: Aquí NO hay ningún div de logo absoluto. Está limpio. */}
+        {/* Logo Tipográfico en Hero (Oculto en móvil) */}
+        <div className="absolute top-8 left-8 md:top-12 md:left-12 z-30 font-bold text-xl tracking-tight hidden md:block">
+          KEVIN<span className="text-blue-500">CONSULTING</span>
+        </div>
 
         <div className="absolute inset-0 z-0">
           <Canvas
@@ -75,7 +78,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- TECH STACK (CINTA INFINITA) --- */}
+      {/* --- TECH STACK --- */}
       <Reveal width="100%" delay={0.2}>
         <TechStack />
       </Reveal>
@@ -161,7 +164,7 @@ export default function Home() {
             </Reveal>
           </div>
 
-          {/* TARJETA 3: IMAGEN */}
+          {/* TARJETA 3: IMAGEN (BOTÓN FUNCIONAL AQUÍ) */}
           <div className="h-full">
             <Reveal width="100%">
               <SpotlightCard className="h-full p-8 group flex flex-col" spotlightColor="rgba(59, 130, 246, 0.2)">
@@ -176,7 +179,14 @@ export default function Home() {
                 </div>
                 <div className="mt-auto bg-white/5 p-4 rounded-xl border border-white/10 text-center group-hover:bg-white/10 transition-colors relative overflow-hidden">
                   <div className="text-xs text-slate-300 mb-2">Tu Web Trabajando 24/7</div>
-                  <button className="w-full py-2 bg-blue-600 text-white text-[10px] font-bold rounded shadow-lg flex items-center justify-center gap-2 hover:scale-105 transition-transform">
+                  {/* BOTÓN REAL */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open('https://wa.me/522291589149?text=Hola%20Kevin,%20me%20interesa%20una%20Web%20Profesional.', '_blank');
+                    }}
+                    className="w-full py-2 bg-blue-600 text-white text-[10px] font-bold rounded shadow-lg flex items-center justify-center gap-2 hover:scale-105 transition-transform cursor-pointer"
+                  >
                     <MousePointerClick size={12} />
                     Solicitar Cotización
                   </button>
