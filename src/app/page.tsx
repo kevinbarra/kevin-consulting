@@ -10,6 +10,7 @@ import Testimonials from '@/components/sections/Testimonials';
 import Footer from '@/components/layout/Footer';
 import Reveal from '@/components/layout/Reveal';
 import SpotlightCard from '@/components/layout/SpotlightCard';
+import CountUp from '@/components/layout/CountUp'; // <--- IMPORTACIÓN NUEVA
 
 export default function Home() {
 
@@ -25,11 +26,7 @@ export default function Home() {
 
       {/* --- HERO SECTION --- */}
       <section className="relative h-screen w-full flex flex-col items-center justify-center">
-
-        {/* CORRECCIÓN 1: Eliminado el div del Logo duplicado aquí. */}
-
         <div className="absolute inset-0 z-0">
-          {/* CORRECCIÓN 2: Configuración de Alto Rendimiento restaurada */}
           <Canvas
             camera={{ position: [0, 0, 50], fov: 50 }}
             dpr={[1, 1.5]}
@@ -38,7 +35,6 @@ export default function Home() {
             <ambientLight intensity={0.5} />
             <pointLight position={[10, 10, 10]} color="#3b82f6" />
             <Suspense fallback={null}>
-              {/* CORRECCIÓN 3: Regresamos a 400 para eliminar el LAG. */}
               <Particles count={400} />
             </Suspense>
           </Canvas>
@@ -46,7 +42,6 @@ export default function Home() {
         </div>
 
         <div className="relative z-20 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">
-
           <Reveal>
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
               Tu negocio tiene potencial.
@@ -55,13 +50,11 @@ export default function Home() {
               </span>
             </h1>
           </Reveal>
-
           <Reveal delay={0.2}>
             <p className="text-slate-300 text-lg md:text-2xl max-w-2xl mx-auto mb-10 leading-relaxed font-light text-center">
               Olvídate del papel y el caos. Creamos el sistema exacto que necesitas para controlar tus inventarios, citas y ventas sin complicarte la vida.
             </p>
           </Reveal>
-
           <Reveal delay={0.4}>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
               <button
@@ -76,7 +69,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- SECCIÓN SOLUCIONES (CON SPOTLIGHT) --- */}
+      {/* --- SECCIÓN SOLUCIONES --- */}
       <section id="soluciones" className="relative z-20 py-24 px-6 md:px-10 max-w-7xl mx-auto">
         <div className="text-center mb-16 flex flex-col items-center">
           <Reveal>
@@ -117,7 +110,7 @@ export default function Home() {
                       <div className="w-1/4 h-[50%] bg-purple-500/50 rounded-t-sm group-hover:h-[70%] transition-all duration-1000 ease-out delay-300"></div>
                     </div>
                     <div className="text-[10px] text-slate-400 text-center mt-2">
-                      Detectamos fuga de $3,000.
+                      Detectamos fuga de <CountUp value={3000} prefix="$" />
                     </div>
                   </div>
                 </div>
@@ -144,7 +137,9 @@ export default function Home() {
                       <Users size={16} className="text-orange-400" />
                       <div>
                         <div className="text-[10px] text-slate-500 uppercase">En Espera</div>
-                        <div className="text-lg font-bold text-white">3 Personas</div>
+                        <div className="text-lg font-bold text-white">
+                          <CountUp value={3} suffix=" Personas" />
+                        </div>
                       </div>
                     </div>
                     <div className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]"></div>
@@ -208,14 +203,20 @@ export default function Home() {
                           <div className="p-1.5 bg-blue-500/20 rounded text-blue-400"><Layers size={12} /></div>
                           <div className="flex-1">
                             <div className="text-[10px] text-slate-400">Ventas de Hoy</div>
-                            <div className="text-xs font-bold text-white">$12,450.00</div>
+                            <div className="text-xs font-bold text-white">
+                              {/* NUMERO VIVO */}
+                              <CountUp value={12450} prefix="$" decimals={2} />
+                            </div>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
                           <div className="p-1.5 bg-purple-500/20 rounded text-purple-400"><Users size={12} /></div>
                           <div className="flex-1">
                             <div className="text-[10px] text-slate-400">Personal Activo</div>
-                            <div className="text-xs font-bold text-white">4 Empleados</div>
+                            <div className="text-xs font-bold text-white">
+                              {/* NUMERO VIVO */}
+                              <CountUp value={4} suffix=" Empleados" />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -235,12 +236,15 @@ export default function Home() {
       <Reveal width="100%">
         <HowItWorks />
       </Reveal>
+
       <Reveal width="100%">
         <Testimonials />
       </Reveal>
+
       <Reveal width="100%">
         <About />
       </Reveal>
+
       <Footer />
     </main>
   );
