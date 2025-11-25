@@ -7,10 +7,11 @@ import { ArrowRight, CheckCircle2, Star, BarChart3, Users, Layers, MousePointerC
 import HowItWorks from '@/components/sections/HowItWorks';
 import About from '@/components/sections/About';
 import Testimonials from '@/components/sections/Testimonials';
+import TechStack from '@/components/sections/TechStack'; // <--- NUEVA IMPORTACIÓN
 import Footer from '@/components/layout/Footer';
 import Reveal from '@/components/layout/Reveal';
 import SpotlightCard from '@/components/layout/SpotlightCard';
-import CountUp from '@/components/layout/CountUp'; // <--- IMPORTACIÓN NUEVA
+import CountUp from '@/components/layout/CountUp';
 
 export default function Home() {
 
@@ -26,7 +27,14 @@ export default function Home() {
 
       {/* --- HERO SECTION --- */}
       <section className="relative h-screen w-full flex flex-col items-center justify-center">
+
+        {/* Logo Tipográfico en Hero (Oculto en móvil, visible en PC para balance) */}
+        <div className="absolute top-8 left-8 md:top-12 md:left-12 z-30 font-bold text-xl tracking-tight hidden md:block">
+          KEVIN<span className="text-blue-500">CONSULTING</span>
+        </div>
+
         <div className="absolute inset-0 z-0">
+          {/* Configuración de Alto Rendimiento para evitar Lag */}
           <Canvas
             camera={{ position: [0, 0, 50], fov: 50 }}
             dpr={[1, 1.5]}
@@ -35,6 +43,7 @@ export default function Home() {
             <ambientLight intensity={0.5} />
             <pointLight position={[10, 10, 10]} color="#3b82f6" />
             <Suspense fallback={null}>
+              {/* Cantidad equilibrada para PC y Móvil */}
               <Particles count={400} />
             </Suspense>
           </Canvas>
@@ -42,6 +51,7 @@ export default function Home() {
         </div>
 
         <div className="relative z-20 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">
+
           <Reveal>
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
               Tu negocio tiene potencial.
@@ -50,11 +60,13 @@ export default function Home() {
               </span>
             </h1>
           </Reveal>
+
           <Reveal delay={0.2}>
             <p className="text-slate-300 text-lg md:text-2xl max-w-2xl mx-auto mb-10 leading-relaxed font-light text-center">
               Olvídate del papel y el caos. Creamos el sistema exacto que necesitas para controlar tus inventarios, citas y ventas sin complicarte la vida.
             </p>
           </Reveal>
+
           <Reveal delay={0.4}>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
               <button
@@ -68,6 +80,11 @@ export default function Home() {
           </Reveal>
         </div>
       </section>
+
+      {/* --- TECH STACK (CINTA INFINITA) --- */}
+      <Reveal width="100%" delay={0.2}>
+        <TechStack />
+      </Reveal>
 
       {/* --- SECCIÓN SOLUCIONES --- */}
       <section id="soluciones" className="relative z-20 py-24 px-6 md:px-10 max-w-7xl mx-auto">
@@ -204,7 +221,6 @@ export default function Home() {
                           <div className="flex-1">
                             <div className="text-[10px] text-slate-400">Ventas de Hoy</div>
                             <div className="text-xs font-bold text-white">
-                              {/* NUMERO VIVO */}
                               <CountUp value={12450} prefix="$" decimals={2} />
                             </div>
                           </div>
@@ -214,7 +230,6 @@ export default function Home() {
                           <div className="flex-1">
                             <div className="text-[10px] text-slate-400">Personal Activo</div>
                             <div className="text-xs font-bold text-white">
-                              {/* NUMERO VIVO */}
                               <CountUp value={4} suffix=" Empleados" />
                             </div>
                           </div>
@@ -233,6 +248,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* --- SECCIONES FINALES --- */}
       <Reveal width="100%">
         <HowItWorks />
       </Reveal>
