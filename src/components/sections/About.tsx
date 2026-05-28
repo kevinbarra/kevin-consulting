@@ -47,19 +47,39 @@ export default function About() {
                      </div>
 
                      <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight text-white">
-                        No soy una agencia. <br className="hidden md:block" /> Soy tu socio tecnológico.
+                        No construimos sitios simples. <br className="hidden md:block" /> Diseñamos motores de rentabilidad.
                      </h2>
 
                      <div className="space-y-4 text-slate-300 leading-relaxed text-base md:text-lg">
                         <p>
-                           Hola, soy <span className="text-white font-semibold">Kevin Barra</span>. Como ingeniero, he visto demasiados negocios con potencial estancarse por el caos operativo o por herramientas que nadie entiende.
+                           Hola, soy <span className="text-white font-semibold">Kevin Barra</span>. A lo largo de mi trayectoria como ingeniero de software, he visto cómo procesos manuales y sistemas frágiles limitan el crecimiento de empresas con gran potencial.
                         </p>
                         <p>
-                           Fundé KevinConsulting con una misión simple: traer la tecnología de las grandes empresas a tu negocio, sin la complejidad. No vendo "código"; vendo <span className="text-white font-semibold">control, tiempo y paz mental</span>.
+                           Fundé **Kevin Consulting** para llevar la arquitectura de software avanzada y la automatización en la nube a empresas en fase de escalamiento. No entregamos código genérico; diseñamos la infraestructura digital que automatiza tus operaciones y blinda tu margen operativo.
                         </p>
                         <p>
-                           Cuando trabajas conmigo, no hablas con un vendedor. Hablas directamente con quien diseña tu solución. Mi compromiso es personal.
+                           Al colaborar conmigo, no tratarás con intermediarios. Trabajarás directamente con el arquitecto del sistema para asegurar soluciones de alto impacto y rendimiento óptimo.
                         </p>
+                     </div>
+
+                     {/* Métrica / Aura Grids */}
+                     <div className="grid grid-cols-2 gap-4 mt-8 border-t border-white/5 pt-6">
+                        <div>
+                           <div className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">99.9%</div>
+                           <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Disponibilidad en Sistemas</div>
+                        </div>
+                        <div>
+                           <div className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">+30%</div>
+                           <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Eficiencia Operativa Media</div>
+                        </div>
+                        <div>
+                           <div className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">100%</div>
+                           <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Ingeniería a la Medida</div>
+                        </div>
+                        <div>
+                           <div className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">CI/CD</div>
+                           <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Despliegue Continuo Automatizado</div>
+                        </div>
                      </div>
 
                      {/* Firma (Solo PC porque en móvil ya pusimos los datos arriba) */}

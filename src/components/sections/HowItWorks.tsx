@@ -6,8 +6,8 @@ import { motion } from 'framer-motion';
 const steps = [
   {
     id: 1,
-    title: "Diagnóstico Sin Costo",
-    description: "No vendemos por vender. Primero nos sentamos contigo, vemos cómo opera tu negocio y encontramos dónde se está fugando el dinero.",
+    title: "Diagnóstico & Viabilidad",
+    description: "Identificamos cuellos de botella operativos e ineficiencias financieras en tus procesos actuales para trazar una solución técnica con ROI claro.",
     icon: <Search className="w-6 h-6 text-blue-400" />,
     color: "blue",
     glowColor: "bg-sky-500/30",
@@ -15,8 +15,8 @@ const steps = [
   },
   {
     id: 2,
-    title: "Ingeniería a la Medida",
-    description: "Nada de plantillas genéricas. Desarrollamos el sistema exacto que necesitas. Si ocupas inventario, hacemos inventario.",
+    title: "Ingeniería de Software",
+    description: "Diseñamos el plano arquitectónico y desarrollamos código personalizado. Tu sistema se crea exclusivamente a la medida, sin plantillas ni limitaciones.",
     icon: <Code2 className="w-6 h-6 text-purple-400" />,
     color: "purple",
     glowColor: "bg-purple-500/20",
@@ -24,8 +24,8 @@ const steps = [
   },
   {
     id: 3,
-    title: "Implementación y Despegue",
-    description: "Te entregamos el control. Te enseñamos a usarlo (es tan fácil como usar Facebook) y te damos soporte para asegurar que tu negocio crezca.",
+    title: "Despliegue & Monitoreo",
+    description: "Lanzamos tu sistema en infraestructura cloud redundante y segura, capacitamos a tu equipo y configuramos alertas de salud automatizadas.",
     icon: <Rocket className="w-6 h-6 text-emerald-400" />,
     color: "emerald",
     glowColor: "bg-emerald-500/20",
@@ -48,9 +48,9 @@ export default function HowItWorks() {
       <div className="max-w-7xl mx-auto px-6 md:px-10">
 
         <div className="text-center mb-20">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">¿Cómo logramos el cambio?</h2>
-          <p className="text-slate-400 max-w-2xl mx-auto">
-            Un proceso transparente de 3 pasos diseñado para dueños de negocio, no para programadores.
+          <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight">¿Cómo orquestamos el cambio?</h2>
+          <p className="text-slate-400 max-w-2xl mx-auto text-sm md:text-base">
+            Un proceso estructurado de ingeniería de software orientado a asegurar la usabilidad y el retorno de inversión técnico.
           </p>
         </div>
 
