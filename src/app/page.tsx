@@ -1,8 +1,8 @@
 'use client';
 
+import { useRef, useEffect, useState, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import Particles from '@/components/canvas/Particles';
-import { Suspense } from 'react';
 import { ArrowRight } from 'lucide-react';
 import HowItWorks from '@/components/sections/HowItWorks';
 import About from '@/components/sections/About';
@@ -15,6 +15,28 @@ import Footer from '@/components/layout/Footer';
 import Reveal from '@/components/layout/Reveal';
 
 export default function Home() {
+  const heroRef = useRef<HTMLDivElement>(null);
+  const [isHeroVisible, setIsHeroVisible] = useState(true);
+  const [particleCount, setParticleCount] = useState(120);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setParticleCount(window.innerWidth < 768 ? 120 : 400);
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsHeroVisible(entry.isIntersecting);
+      },
+      { threshold: 0.0 }
+    );
+
+    if (heroRef.current) {
+      observer.observe(heroRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const scrollToSolutions = () => {
     const section = document.getElementById('soluciones');
@@ -27,23 +49,25 @@ export default function Home() {
     <main className="relative w-full min-h-screen bg-[#0f172a] text-white overflow-x-clip">
 
       {/* --- HERO SECTION --- */}
-      <section className="relative h-screen w-full flex flex-col items-center justify-center">
+      <section ref={heroRef} className="relative h-screen w-full flex flex-col items-center justify-center">
 
         {/* LOGO DUPLICADO ELIMINADO (Solo se ve el del Navbar) */}
 
-        <div className="absolute inset-0 z-0">
-          {/* Configuración optimizada para rendimiento */}
-          <Canvas
-            camera={{ position: [0, 0, 50], fov: 50 }}
-            dpr={[1, 1.5]}
-            gl={{ antialias: false, powerPreference: "high-performance" }}
-          >
-            <ambientLight intensity={0.5} />
-            <pointLight position={[10, 10, 10]} color="#3b82f6" />
-            <Suspense fallback={null}>
-              <Particles count={400} />
-            </Suspense>
-          </Canvas>
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          {/* Configuración optimizada para rendimiento y pausa en renderizado si no es visible */}
+          {isHeroVisible && (
+            <Canvas
+              camera={{ position: [0, 0, 50], fov: 50 }}
+              dpr={[1, 1.5]}
+              gl={{ antialias: false, powerPreference: "high-performance" }}
+            >
+              <ambientLight intensity={0.5} />
+              <pointLight position={[10, 10, 10]} color="#3b82f6" />
+              <Suspense fallback={null}>
+                <Particles count={particleCount} />
+              </Suspense>
+            </Canvas>
+          )}
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0f172a]/20 to-[#0f172a] z-10" />
         </div>
 

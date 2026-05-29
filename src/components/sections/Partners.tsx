@@ -135,8 +135,8 @@ export default function Partners() {
                     spotlightColor={partner.spotlight}
                     isHighlighted={isHighlighted}
                   >
-                    {/* Logos always illuminated (no grayscale), with a pulsing scale on active sequence item */}
-                    <div className={`mb-4 filter grayscale-0 contrast-100 brightness-100 transition-all duration-500 ease-out transform ${
+                    {/* Logos always illuminated (no grayscale), centered and with a pulsing scale on active sequence item */}
+                    <div className={`mb-4 w-full flex items-center justify-center filter grayscale-0 contrast-100 brightness-100 transition-all duration-500 ease-out transform ${
                       isHighlighted ? 'scale-110 brightness-110 drop-shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'scale-100 group-hover:scale-110'
                     }`}>
                       {partner.logo}
