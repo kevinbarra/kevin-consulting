@@ -3,7 +3,7 @@
 import Reveal from '../layout/Reveal';
 import SpotlightCard from '../layout/SpotlightCard';
 import { CheckCircle2, TrendingUp, Layers, Cpu, Server } from 'lucide-react';
-import { InventoryMockup, QueueMockup, PerformanceMockup, CloudMockup } from '../canvas/InteractiveMockup';
+import { InventoryMockup, QueueMockup, PerformanceMockup, CloudMockup, CodeConsoleMockup } from '../canvas/InteractiveMockup';
 
 export default function BentoSolutions() {
   return (
@@ -141,7 +141,7 @@ export default function BentoSolutions() {
                 </div>
 
                 <div className="shrink-0 w-full md:w-fit flex justify-center">
-                  <CloudMockup />
+                  <CodeConsoleMockup />
                 </div>
               </div>
             </SpotlightCard>

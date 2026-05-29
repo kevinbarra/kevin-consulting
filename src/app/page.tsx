@@ -2,6 +2,7 @@
 
 import { Canvas } from '@react-three/fiber';
 import Particles from '@/components/canvas/Particles';
+import TechCore from '@/components/canvas/TechCore';
 import { Suspense } from 'react';
 import { ArrowRight } from 'lucide-react';
 import HowItWorks from '@/components/sections/HowItWorks';
@@ -9,6 +10,7 @@ import About from '@/components/sections/About';
 import Testimonials from '@/components/sections/Testimonials';
 import TechStack from '@/components/sections/TechStack';
 import BentoSolutions from '@/components/sections/BentoSolutions';
+import ScrollScrubShowcase from '@/components/sections/ScrollScrubShowcase';
 import Partners from '@/components/sections/Partners';
 import Footer from '@/components/layout/Footer';
 import Reveal from '@/components/layout/Reveal';
@@ -41,6 +43,7 @@ export default function Home() {
             <pointLight position={[10, 10, 10]} color="#3b82f6" />
             <Suspense fallback={null}>
               <Particles count={400} />
+              <TechCore />
             </Suspense>
           </Canvas>
           <div className="absolute inset-0 bg-gradient-to-b from-[#0f172a]/50 via-[#0f172a]/80 to-[#0f172a] z-10" />
@@ -83,6 +86,9 @@ export default function Home() {
 
       {/* --- SECCIÓN SOLUCIONES BENTO --- */}
       <BentoSolutions />
+
+      {/* --- SECCIÓN PORTAFOLIO SCROLL-SCRUB --- */}
+      <ScrollScrubShowcase />
 
       {/* --- SECCIÓN PARTNERS LOGOS --- */}
       <Partners />

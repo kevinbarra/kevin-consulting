@@ -353,3 +353,101 @@ export function CloudMockup() {
     </div>
   );
 }
+
+// --- 5. MOCKUP DE CONSOLA DE CÓDIGO INTERACTIVA ---
+export function CodeConsoleMockup() {
+  const [activeTab, setActiveTab] = useState<'infra.tf' | 'predict.py' | 'api.ts'>('infra.tf');
+  const [consoleOutput, setConsoleOutput] = useState<string[]>([]);
+  const [isRunning, setIsRunning] = useState(false);
+
+  const files = {
+    'infra.tf': `resource "aws_ecs_service" "app" {
+  name            = "kevin-consulting"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.app.arn
+  desired_count   = 3
+  launch_type     = "FARGATE"
+  
+  network_configuration {
+    security_groups = [aws_security_group.tasks.id]
+    subnets         = aws_subnet.private[*].id
+  }
+}`,
+    'predict.py': `def calculate_reorder_point(lead_time, sales_mean, sales_std, sl=0.95):
+    # Safety stock calculation using statistics
+    z_score = stats.norm.ppf(sl)
+    safety_stock = z_score * math.sqrt(lead_time) * sales_std
+    avg_demand = lead_time * sales_mean
+    return avg_demand + safety_stock`,
+    'api.ts': `export async function POST(req: Request) {
+  const payload = await req.json();
+  const signature = req.headers.get("x-signature");
+  
+  if (!verifySignature(payload, signature, process.env.SECRET)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  
+  await redis.set(\`orders:\${payload.id}\`, JSON.stringify(payload));
+  return NextResponse.json({ status: "synced", latency_ms: 11 });
+}`
+  };
+
+  const handleRun = () => {
+    if (isRunning) return;
+    setIsRunning(true);
+    setConsoleOutput(["compiling...", "linking packages...", "starting test run..."]);
+    setTimeout(() => {
+      if (activeTab === 'infra.tf') {
+        setConsoleOutput(prev => [...prev, "terraform plan: 1 to add, 0 to change, 0 to destroy.", "SUCCESS: AWS ECS service validated! ✅"]);
+      } else if (activeTab === 'predict.py') {
+        setConsoleOutput(prev => [...prev, "running simulation...", "reorder_point: 54 units (accuracy: 98.4%)", "SUCCESS: prediction pipeline OK! ✅"]);
+      } else {
+        setConsoleOutput(prev => [...prev, "sending mock HTTP POST request...", "redis cache update: OK", "Next.js routing check: 200 OK (11ms)", "SUCCESS: API route synced! ✅"]);
+      }
+      setIsRunning(false);
+    }, 1200);
+  };
+
+  return (
+    <div className="bg-[#0f172a] rounded-xl border border-white/5 p-4 text-xs font-mono w-full max-w-sm shadow-2xl flex flex-col justify-between min-h-[220px]">
+      <div>
+        <div className="flex border-b border-white/10 pb-2 mb-3 gap-2 overflow-x-auto">
+          {(['infra.tf', 'predict.py', 'api.ts'] as const).map(tab => (
+            <button
+              key={tab}
+              onClick={() => {
+                setActiveTab(tab);
+                setConsoleOutput([]);
+              }}
+              className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${activeTab === tab ? 'bg-blue-600 text-white' : 'bg-white/5 text-slate-400 hover:text-white'}`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        <pre className="bg-black/40 p-2.5 rounded border border-white/5 text-[9px] text-slate-300 overflow-x-auto leading-normal max-h-[100px] select-all">
+          <code>{files[activeTab]}</code>
+        </pre>
+      </div>
+
+      <div className="mt-3 space-y-2">
+        <button
+          onClick={handleRun}
+          disabled={isRunning}
+          className="w-full py-1.5 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 text-white rounded text-[10px] font-bold transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/20"
+        >
+          {isRunning ? <RefreshCw size={10} className="animate-spin" /> : <Play size={10} />}
+          Ejecutar Código
+        </button>
+
+        {consoleOutput.length > 0 && (
+          <div className="bg-black/60 p-2 rounded border border-white/5 text-[8px] text-emerald-400 max-h-[60px] overflow-y-auto">
+            {consoleOutput.map((out, i) => <div key={i}>&gt; {out}</div>)}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
