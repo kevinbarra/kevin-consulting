@@ -48,7 +48,7 @@ export default function Home() {
 
         {/* LOGO DUPLICADO ELIMINADO (Solo se ve el del Navbar) */}
 
-        <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-80">
           {/* Configuración optimizada para rendimiento y pausa en renderizado si no es visible */}
           {isHeroVisible && (
             <Canvas
@@ -63,7 +63,7 @@ export default function Home() {
               </Suspense>
             </Canvas>
           )}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0f172a]/20 to-[#0f172a] z-10" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0f172a]/60 to-[#0f172a] z-10" />
         </div>
 
         <div className="relative z-20 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">

@@ -9,8 +9,8 @@ export default function TechCore() {
   const outerMeshRef = useRef<THREE.Mesh>(null);
   const { viewport } = useThree();
 
-  // Scale shapes responsively, making it significantly larger on mobile (min 0.9) to look spectacular
-  const responsiveScale = Math.min(1.25, Math.max(0.9, viewport.width / 22));
+  // Scale shapes responsively, optimized middle size on mobile (min 0.65) to not overlap text readability
+  const responsiveScale = Math.min(1.1, Math.max(0.65, viewport.width / 24));
 
   useFrame((state) => {
     const time = state.clock.getElapsedTime();
@@ -28,29 +28,29 @@ export default function TechCore() {
 
   return (
     <group position={[0, 0, 0]}>
-      {/* 1. Inner Torus Knot - High Emissive Electric Blue/Cyan Glow */}
+      {/* 1. Inner Torus Knot - Royal Blue (Soft and elegant, matches original style) */}
       <mesh ref={innerMeshRef} scale={[responsiveScale, responsiveScale, responsiveScale]}>
         <torusKnotGeometry args={[8, 2.2, 100, 16]} />
         <meshStandardMaterial 
-          color="#3b82f6" 
-          emissive="#00f0ff" 
-          emissiveIntensity={1.8}
+          color="#2563eb" 
+          emissive="#1d4ed8" 
+          emissiveIntensity={0.8}
           wireframe 
           roughness={0.1}
           metalness={0.9}
         />
       </mesh>
 
-      {/* 2. Outer Icosahedron - Bright Glowing Emerald Shell */}
-      <mesh ref={outerMeshRef} scale={[responsiveScale * 1.75, responsiveScale * 1.75, responsiveScale * 1.75]}>
+      {/* 2. Outer Icosahedron - Emerald Green Shell (Subtle contrast) */}
+      <mesh ref={outerMeshRef} scale={[responsiveScale * 1.7, responsiveScale * 1.7, responsiveScale * 1.7]}>
         <icosahedronGeometry args={[10, 2]} />
         <meshStandardMaterial 
           color="#10b981" 
-          emissive="#34d399" 
-          emissiveIntensity={1.2}
+          emissive="#047857" 
+          emissiveIntensity={0.4}
           wireframe 
           transparent
-          opacity={0.3}
+          opacity={0.15}
         />
       </mesh>
     </group>
