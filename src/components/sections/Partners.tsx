@@ -46,7 +46,7 @@ const partners = [
   {
     name: "RG Roofing & Siding",
     url: "#", 
-    description: "SaaS de Cotizaciones & Contratos",
+    description: "Sistema de Cotizaciones & Contratos",
     // Roof / construction SVG
     logo: (
       <svg className="w-12 h-12 text-blue-400 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

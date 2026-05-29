@@ -100,7 +100,7 @@ export default function BentoSolutions() {
                 <div className="inline-block px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg text-[10px] font-bold tracking-wider uppercase">
                   Conversión & Autoridad
                 </div>
-                <h3 className="text-xl font-bold text-white tracking-tight">SaaS & Plataformas a la Medida</h3>
+                <h3 className="text-xl font-bold text-white tracking-tight">Sistemas Web & Plataformas a la Medida</h3>
                 <p className="text-slate-400 text-xs leading-relaxed">
                   Sistemas web ultra-rápidos que proyectan solidez corporativa y cargan al instante. Optimizados con Core Web Vitals excelentes para maximizar conversiones y ventas.
                 </p>
