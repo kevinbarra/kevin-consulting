@@ -10,39 +10,36 @@ import { Star, Quote, CheckCircle2, ArrowRight } from 'lucide-react';
 const testimonials = [
   {
     id: 1,
-    client: "Carlos M.",
-    business: "Panadería La Tradición",
-    role: "Dueño",
-    // La psicología aquí es: "Dinero recuperado".
-    highlight: "Recuperé $8,000 al mes",
-    quote: "Antes tiraba charolas de pan frío todos los días. Me dolía el codo ver ese dinero en la basura. Con el dashboard de Kevin, ahora sé exactamente cuánto hornear. La merma bajó a casi cero en 3 semanas.",
+    client: "Lic. Martha D.",
+    business: "Del Valle Asesores",
+    role: "Directora Operativa",
+    highlight: "Optimización del 40% del tiempo",
+    quote: "El cotizador digital y portal de clientes que construimos automatizó la atención inicial de prospectos. Nuestros agentes ahora se enfocan únicamente en cierres de pólizas importantes, incrementando el volumen de venta de manera constante.",
     color: "text-emerald-400",
     bg: "bg-emerald-500/10",
-    avatar: "C"
+    avatar: "M"
   },
   {
     id: 2,
-    client: "Rogelio G.",
-    business: "RG Roofing & Siding (Texas)",
-    role: "Contratista General",
-    // La psicología aquí es: "Validación y Respeto".
-    highlight: "Me gané un bid de $25k",
-    quote: "Era muy bueno trabajando, pero los gringos no confiaban en mí porque mandaba cotizaciones por WhatsApp. Con la web y el correo corporativo, me ven como una empresa grande. Acabo de cerrar mi obra más grande.",
-    color: "text-blue-400",
-    bg: "bg-blue-500/10",
-    avatar: "R"
+    client: "Alejandro R.",
+    business: "Barbería Fulanos",
+    role: "Fundador",
+    highlight: "Cero pérdidas por inasistencias",
+    quote: "Nuestros clientes ahora agendan por sí mismos a través del sistema web y reciben recordatorios automáticos. Eliminamos por completo los traslapes de citas y las inasistencias de última hora, optimizando la caja diaria.",
+    color: "text-orange-400",
+    bg: "bg-orange-500/10",
+    avatar: "A"
   },
   {
     id: 3,
-    client: "Sra. Lupita",
-    business: "Pollos Asados El Puente",
-    role: "Gerente",
-    // La psicología aquí es: "Paz Mental".
-    highlight: "Se acabaron los gritos",
-    quote: "Los fines de semana eran un infierno, los meseros se peleaban y los clientes se iban enojados. Puse la pantalla de turnos y ahora hay un silencio y un orden que no creí posible. Mis empleados trabajan felices.",
-    color: "text-orange-400",
-    bg: "bg-orange-500/10",
-    avatar: "L"
+    client: "Santiago V.",
+    business: "Kofii Club",
+    role: "Co-fundador",
+    highlight: "+24% en recompras de clientes",
+    quote: "La aplicación móvil de pedidos anticipados y el sistema de lealtad inteligente han hecho que la frecuencia de compra de nuestros clientes habituales crezca de forma sostenida. La experiencia móvil es sumamente rápida y fluida.",
+    color: "text-blue-400",
+    bg: "bg-blue-500/10",
+    avatar: "S"
   }
 ];
 

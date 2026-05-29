@@ -35,7 +35,7 @@ export default function BentoSolutions() {
         {/* 1. ERP & INVENTARIO */}
         <div className="md:col-span-2">
           <Reveal width="100%">
-            <SpotlightCard className="h-full p-8 group flex flex-col justify-between" spotlightColor="rgba(59, 130, 246, 0.2)">
+            <SpotlightCard className="h-full p-6 md:p-8 group flex flex-col justify-between" spotlightColor="rgba(59, 130, 246, 0.2)">
               <div className="absolute top-0 right-0 p-32 bg-blue-500/5 blur-[80px] rounded-full -z-10" />
               
               <div className="flex flex-col md:flex-row gap-8 items-center justify-between h-full">
@@ -70,7 +70,7 @@ export default function BentoSolutions() {
         {/* 2. AUTOMATIZACIÓN DE TURNOS / QUEUE INTELLIGENCE */}
         <div>
           <Reveal width="100%" delay={0.1}>
-            <SpotlightCard className="h-full p-8 group flex flex-col justify-between" spotlightColor="rgba(249, 115, 22, 0.2)">
+            <SpotlightCard className="h-full p-6 md:p-8 group flex flex-col justify-between" spotlightColor="rgba(249, 115, 22, 0.2)">
               <div className="absolute bottom-0 left-0 p-20 bg-orange-500/5 blur-[60px] rounded-full -z-10" />
               
               <div className="space-y-4 mb-6">
@@ -93,7 +93,7 @@ export default function BentoSolutions() {
         {/* 3. HIGH PERFORMANCE SAAS */}
         <div>
           <Reveal width="100%">
-            <SpotlightCard className="h-full p-8 group flex flex-col justify-between" spotlightColor="rgba(16, 185, 129, 0.2)">
+            <SpotlightCard className="h-full p-6 md:p-8 group flex flex-col justify-between" spotlightColor="rgba(16, 185, 129, 0.2)">
               <div className="absolute top-0 right-0 p-20 bg-emerald-500/5 blur-[60px] rounded-full -z-10" />
               
               <div className="space-y-4 mb-6">
@@ -116,7 +116,7 @@ export default function BentoSolutions() {
         {/* 4. CLOUD INFRASTRUCTURE & DEVOPS */}
         <div className="md:col-span-2">
           <Reveal width="100%" delay={0.1}>
-            <SpotlightCard className="h-full p-8 group flex flex-col justify-between" spotlightColor="rgba(168, 85, 247, 0.2)">
+            <SpotlightCard className="h-full p-6 md:p-8 group flex flex-col justify-between" spotlightColor="rgba(168, 85, 247, 0.2)">
               <div className="absolute bottom-0 left-0 p-32 bg-purple-500/5 blur-[80px] rounded-full -z-10" />
               
               <div className="flex flex-col md:flex-row-reverse gap-8 items-center justify-between h-full">
