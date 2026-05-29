@@ -17,13 +17,8 @@ import Reveal from '@/components/layout/Reveal';
 export default function Home() {
   const heroRef = useRef<HTMLDivElement>(null);
   const [isHeroVisible, setIsHeroVisible] = useState(true);
-  const [particleCount, setParticleCount] = useState(120);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setParticleCount(window.innerWidth < 768 ? 120 : 400);
-    }
-
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsHeroVisible(entry.isIntersecting);
@@ -64,7 +59,7 @@ export default function Home() {
               <ambientLight intensity={0.5} />
               <pointLight position={[10, 10, 10]} color="#3b82f6" />
               <Suspense fallback={null}>
-                <Particles count={particleCount} />
+                <Particles count={400} />
               </Suspense>
             </Canvas>
           )}
