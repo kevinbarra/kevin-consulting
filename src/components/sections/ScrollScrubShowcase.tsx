@@ -66,6 +66,73 @@ function ProjectInteractiveMockup({ id }: { id: number }) {
   }, []);
 
   if (id === 0) {
+    // General Intro System Status Dashboard
+    return (
+      <div className="w-full h-full p-5 flex flex-col justify-between bg-slate-950/40 text-slate-200 text-xs font-mono select-none">
+        {/* Header bar of system */}
+        <div className="flex items-center justify-between border-b border-white/5 pb-2">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-blue-500 animate-ping" />
+            <span className="text-[10px] text-blue-400 font-bold uppercase tracking-wider">MONITOR GENERAL</span>
+          </div>
+          <span className="text-[9px] text-slate-500">INFRAESTRUCTURA ACTIVA</span>
+        </div>
+
+        {/* Dashboard grid */}
+        <div className="grid grid-cols-2 gap-3 my-2 flex-1">
+          {/* Box 1: Server Stats */}
+          <div className="bg-slate-900/60 rounded-xl p-3 border border-white/5 flex flex-col justify-between">
+            <span className="text-[8px] text-slate-500 uppercase font-bold tracking-wider">Rendimiento</span>
+            <div className="space-y-1.5 my-1">
+              <div className="flex justify-between text-[10px]">
+                <span className="text-slate-400">Uso CPU</span>
+                <span className="text-emerald-400 font-bold">12%</span>
+              </div>
+              <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                <motion.div 
+                  className="h-full bg-emerald-400" 
+                  animate={{ width: ["10%", "15%", "12%"] }} 
+                  transition={{ repeat: Infinity, duration: 2 }}
+                />
+              </div>
+              <div className="flex justify-between text-[10px]">
+                <span className="text-slate-400">Latencia</span>
+                <span className="text-emerald-400 font-bold">14ms</span>
+              </div>
+            </div>
+            <span className="text-[7px] text-slate-500">Servidores Cloud: OK</span>
+          </div>
+
+          {/* Box 2: Sincronización */}
+          <div className="bg-slate-900/60 rounded-xl p-3 border border-white/5 flex flex-col justify-between overflow-hidden relative">
+            <span className="text-[8px] text-slate-500 uppercase font-bold tracking-wider">Flujo de Datos</span>
+            {/* Visual nodes pulsing */}
+            <div className="flex items-center justify-center gap-3 my-2">
+              <div className="w-4 h-4 rounded-full bg-blue-500/20 border border-blue-400 flex items-center justify-center text-[7px] text-blue-350 font-bold">BD</div>
+              <span className="text-slate-650 animate-pulse text-[10px]">──➔</span>
+              <div className="w-4 h-4 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-[7px] text-emerald-300 font-bold">API</div>
+            </div>
+            <span className="text-[7px] text-slate-500 text-center">Tasa de éxito: 100%</span>
+          </div>
+        </div>
+
+        {/* Live logs terminal box */}
+        <div className="bg-[#0b0f19] border border-white/5 rounded-lg p-2 font-mono text-[8px] text-slate-400">
+          <div className="flex justify-between text-slate-500 border-b border-white/5 pb-1 mb-1">
+            <span>Diagnóstico del Sistema</span>
+            <span className="text-emerald-500 animate-pulse">● online</span>
+          </div>
+          <div className="space-y-0.5">
+            <div>[sys] Optimización de base de datos... exitosa</div>
+            <div>[sys] Carga de páginas instantánea... lista</div>
+            <div>[sys] Respuesta del servidor en menos de 15ms... activa</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (id === 1) {
     return (
       <div className="w-full h-full p-6 flex flex-col justify-between bg-slate-950/40 text-slate-200 text-xs font-mono select-none">
         {/* Header bar of mock mobile/web app */}
@@ -124,7 +191,7 @@ function ProjectInteractiveMockup({ id }: { id: number }) {
     );
   }
 
-  if (id === 1) {
+  if (id === 2) {
     return (
       <div className="w-full h-full p-5 flex flex-col justify-between bg-slate-950/40 text-slate-200 text-xs font-mono select-none">
         {/* Lodging Mock Card */}
@@ -173,7 +240,7 @@ function ProjectInteractiveMockup({ id }: { id: number }) {
     );
   }
 
-  if (id === 2) {
+  if (id === 3) {
     return (
       <div className="w-full h-full p-5 flex flex-col justify-between bg-slate-950/40 text-slate-200 text-xs font-mono select-none">
         {/* Phone screen loyalty simulator */}
@@ -218,7 +285,7 @@ function ProjectInteractiveMockup({ id }: { id: number }) {
     );
   }
 
-  // id === 3: Restaurantes / Tiempos de servicio
+  // id === 4: Restaurantes / Tiempos de servicio
   return (
     <div className="w-full h-full p-4 flex flex-col justify-between bg-slate-950/40 text-slate-200 text-xs font-mono select-none">
       {/* Board Layout Columns */}
@@ -304,14 +371,17 @@ export default function ScrollScrubShowcase() {
 
   useEffect(() => {
     const unsubscribe = scrollYProgress.on("change", (latest) => {
-      if (latest < 0.25) {
+      // 5 sections mapping for Scroll progress (from 0 to 1.0)
+      if (latest < 0.20) {
         setActiveIndex(0);
-      } else if (latest >= 0.25 && latest < 0.55) {
+      } else if (latest >= 0.20 && latest < 0.40) {
         setActiveIndex(1);
-      } else if (latest >= 0.55 && latest < 0.8) {
+      } else if (latest >= 0.40 && latest < 0.60) {
         setActiveIndex(2);
-      } else {
+      } else if (latest >= 0.60 && latest < 0.80) {
         setActiveIndex(3);
+      } else {
+        setActiveIndex(4);
       }
     });
 
@@ -325,7 +395,8 @@ export default function ScrollScrubShowcase() {
 
       {/* --- DESKTOP STICKY LAYOUT (md:block) --- */}
       <div className="hidden md:block relative w-full">
-        <div className="max-w-7xl mx-auto px-10 grid grid-cols-12 gap-8">
+        {/* Added items-start to grid container to allow sticky column to slide inside the container */}
+        <div className="max-w-7xl mx-auto px-10 grid grid-cols-12 gap-8 items-start">
           
           {/* LEFT SIDE TEXT BLOCKS */}
           <div className="col-span-6 space-y-[10vh] pb-[20vh] z-20">
@@ -356,7 +427,7 @@ export default function ScrollScrubShowcase() {
             {projects.map((proj, idx) => (
               <div key={proj.id} className="h-screen flex flex-col justify-center pr-12 relative">
                 <div className="absolute left-[-20px] top-1/2 -translate-y-1/2 w-[2px] h-[100px] bg-slate-800">
-                  {activeIndex === idx && (
+                  {activeIndex === idx + 1 && (
                     <motion.div 
                       layoutId="scrollbar-indicator" 
                       className="w-full h-full bg-gradient-to-b from-blue-500 to-purple-500"
@@ -408,7 +479,7 @@ export default function ScrollScrubShowcase() {
           </div>
 
           {/* RIGHT SIDE STICKY IMAGE MOCKUP PANEL */}
-          <div className="col-span-6 sticky top-0 h-screen flex items-center justify-center z-10">
+          <div className="col-span-6 sticky top-0 h-screen flex items-center justify-center z-10 self-start">
             <div className="relative w-full aspect-[4/3] max-w-lg rounded-3xl overflow-hidden border border-white/10 bg-[#0b0f19]/80 backdrop-blur-xl p-4 shadow-[0_0_50px_rgba(0,0,0,0.8)]">
               
               {/* Dynamic glowing halo behind the active mockup */}
@@ -416,17 +487,17 @@ export default function ScrollScrubShowcase() {
 
               <div className="relative w-full h-full rounded-2xl overflow-hidden bg-slate-950 flex items-center justify-center">
                 <AnimatePresence mode="wait">
-                  {projects.map((proj, idx) => (
+                  {[0, 1, 2, 3, 4].map((idx) => (
                     activeIndex === idx && (
                       <motion.div
-                        key={proj.id}
+                        key={idx}
                         initial={{ opacity: 0, scale: 0.95, y: 15 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 1.05, y: -15 }}
                         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                         className="absolute inset-0 w-full h-full"
                       >
-                        <ProjectInteractiveMockup id={proj.id} />
+                        <ProjectInteractiveMockup id={idx} />
                       </motion.div>
                     )
                   ))}
@@ -466,7 +537,7 @@ export default function ScrollScrubShowcase() {
               
               {/* Responsive SVG Mockup */}
               <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden border border-white/10 bg-slate-950 mb-6">
-                <ProjectInteractiveMockup id={proj.id} />
+                <ProjectInteractiveMockup id={idx + 1} />
               </div>
 
               <p className="text-slate-400 text-xs leading-relaxed mb-4">
