@@ -24,7 +24,7 @@ export default function Home() {
   };
 
   return (
-    <main className="relative w-full min-h-screen bg-[#0f172a] text-white overflow-x-hidden">
+    <main className="relative w-full min-h-screen bg-[#0f172a] text-white overflow-x-clip">
 
       {/* --- HERO SECTION --- */}
       <section className="relative h-screen w-full flex flex-col items-center justify-center">

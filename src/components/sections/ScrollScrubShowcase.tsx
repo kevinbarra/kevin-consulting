@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
-import { motion, AnimatePresence, useScroll } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUpRight, CheckCircle2, Shield, Zap, Terminal, Smartphone } from 'lucide-react';
 
 const projects = [
@@ -364,29 +364,33 @@ export default function ScrollScrubShowcase() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"]
-  });
-
   useEffect(() => {
-    const unsubscribe = scrollYProgress.on("change", (latest) => {
-      // 5 sections mapping for Scroll progress (from 0 to 1.0)
-      if (latest < 0.20) {
-        setActiveIndex(0);
-      } else if (latest >= 0.20 && latest < 0.40) {
-        setActiveIndex(1);
-      } else if (latest >= 0.40 && latest < 0.60) {
-        setActiveIndex(2);
-      } else if (latest >= 0.60 && latest < 0.80) {
-        setActiveIndex(3);
-      } else {
-        setActiveIndex(4);
-      }
-    });
+    const observerOptions = {
+      root: null,
+      rootMargin: "-40% 0px -40% 0px", // Trigger when the element crosses the middle 20% of the viewport
+      threshold: 0.1
+    };
 
-    return () => unsubscribe();
-  }, [scrollYProgress]);
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const idxAttr = entry.target.getAttribute("data-showcase-idx");
+          if (idxAttr !== null) {
+            setActiveIndex(parseInt(idxAttr, 10));
+          }
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(handleIntersection, observerOptions);
+    const targets = document.querySelectorAll("[data-showcase-idx]");
+    targets.forEach((target) => observer.observe(target));
+
+    return () => {
+      targets.forEach((target) => observer.unobserve(target));
+      observer.disconnect();
+    };
+  }, []);
 
   return (
     <div ref={containerRef} className="relative w-full bg-[#030712]">
@@ -402,7 +406,7 @@ export default function ScrollScrubShowcase() {
           <div className="col-span-6 space-y-[10vh] pb-[20vh] z-20">
             
             {/* Header del Showcase */}
-            <div className="h-screen flex flex-col justify-center pr-8">
+            <div data-showcase-idx="0" className="h-screen flex flex-col justify-center pr-8">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 text-blue-400 rounded-full text-xs font-bold mb-4 uppercase tracking-wider w-fit">
                 Nuestras Soluciones
               </div>
@@ -425,7 +429,7 @@ export default function ScrollScrubShowcase() {
 
             {/* Blocks de cada proyecto */}
             {projects.map((proj, idx) => (
-              <div key={proj.id} className="h-screen flex flex-col justify-center pr-12 relative">
+              <div key={proj.id} data-showcase-idx={idx + 1} className="h-screen flex flex-col justify-center pr-12 relative">
                 <div className="absolute left-[-20px] top-1/2 -translate-y-1/2 w-[2px] h-[100px] bg-slate-800">
                   {activeIndex === idx + 1 && (
                     <motion.div 
