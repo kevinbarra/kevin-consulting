@@ -1,12 +1,16 @@
 'use client';
 
 import { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
 export default function TechCore() {
   const innerMeshRef = useRef<THREE.Mesh>(null);
   const outerMeshRef = useRef<THREE.Mesh>(null);
+  const { viewport } = useThree();
+
+  // Scale shapes responsively to prevent clipping/distortion on smaller/mobile screen sizes
+  const responsiveScale = Math.min(1.0, Math.max(0.4, viewport.width / 45));
 
   useFrame((state) => {
     const time = state.clock.getElapsedTime();
@@ -25,7 +29,7 @@ export default function TechCore() {
   return (
     <group position={[0, 0, 0]}>
       {/* 1. Inner Torus Knot - Electric Blue */}
-      <mesh ref={innerMeshRef} scale={[1, 1, 1]}>
+      <mesh ref={innerMeshRef} scale={[responsiveScale, responsiveScale, responsiveScale]}>
         <torusKnotGeometry args={[8, 2.2, 100, 16]} />
         <meshStandardMaterial 
           color="#2563eb" 
@@ -38,7 +42,7 @@ export default function TechCore() {
       </mesh>
 
       {/* 2. Outer Icosahedron - Emerald Green */}
-      <mesh ref={outerMeshRef} scale={[1.7, 1.7, 1.7]}>
+      <mesh ref={outerMeshRef} scale={[responsiveScale * 1.7, responsiveScale * 1.7, responsiveScale * 1.7]}>
         <icosahedronGeometry args={[10, 2]} />
         <meshStandardMaterial 
           color="#10b981" 

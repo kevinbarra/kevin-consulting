@@ -3,6 +3,7 @@
 import { useRef, useMemo, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
+import TechCore from './TechCore';
 
 const MAX_CONNECTIONS = 1200;
 const MAX_MOUSE_CONNECTIONS = 18;
@@ -255,6 +256,9 @@ export default function Particles({ count = 160 }) {
           depthWrite={false}
         />
       </points>
+
+      {/* 3D Nucleus centered and synced with the network */}
+      <TechCore />
     </group>
   );
 }

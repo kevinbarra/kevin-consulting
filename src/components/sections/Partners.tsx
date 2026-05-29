@@ -1,5 +1,4 @@
-'use client';
-
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import SpotlightCard from '../layout/SpotlightCard';
@@ -90,6 +89,15 @@ const partners = [
 ];
 
 export default function Partners() {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % partners.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <section className="py-24 relative overflow-hidden bg-[#0a0f1d]/40 border-t border-white/5">
       {/* Glow background */}
@@ -105,41 +113,51 @@ export default function Partners() {
 
         {/* LOGO WALL GRID */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {partners.map((partner, index) => (
-            <motion.div
-              key={partner.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-            >
-              <a
-                href={partner.url}
-                target={partner.url === '#' ? undefined : "_blank"}
-                rel="noopener noreferrer"
-                className={`block h-full ${partner.url === '#' ? 'cursor-default' : 'cursor-pointer'}`}
-                onClick={partner.url === '#' ? (e) => e.preventDefault() : undefined}
+          {partners.map((partner, index) => {
+            const isHighlighted = activeIndex === index;
+            return (
+              <motion.div
+                key={partner.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                <SpotlightCard
-                  className="p-6 flex flex-col items-center justify-center text-center h-full group bg-[#111827]/40 hover:bg-[#111827]/80 transition-colors border-white/5 hover:border-white/10"
-                  spotlightColor={partner.spotlight}
+                <a
+                  href={partner.url}
+                  target={partner.url === '#' ? undefined : "_blank"}
+                  rel="noopener noreferrer"
+                  className={`block h-full ${partner.url === '#' ? 'cursor-default' : 'cursor-pointer'}`}
+                  onClick={partner.url === '#' ? (e) => e.preventDefault() : undefined}
                 >
-                  {/* Container for Logo with hover filter transition */}
-                  <div className="mb-4 filter grayscale contrast-75 brightness-75 group-hover:grayscale-0 group-hover:contrast-100 group-hover:brightness-100 transition-all duration-500 ease-out transform group-hover:scale-110">
-                    {partner.logo}
-                  </div>
-                  
-                  <h3 className="font-bold text-sm text-slate-300 group-hover:text-white transition-colors">
-                    {partner.name}
-                  </h3>
-                  
-                  <p className="text-[10px] text-slate-500 group-hover:text-slate-400 mt-1 font-medium transition-colors">
-                    {partner.description}
-                  </p>
-                </SpotlightCard>
-              </a>
-            </motion.div>
-          ))}
+                  <SpotlightCard
+                    className="p-6 flex flex-col items-center justify-center text-center h-full group bg-[#111827]/40 hover:bg-[#111827]/80 transition-colors border-white/5 hover:border-white/10"
+                    spotlightColor={partner.spotlight}
+                    isHighlighted={isHighlighted}
+                  >
+                    {/* Logos always illuminated (no grayscale), with a pulsing scale on active sequence item */}
+                    <div className={`mb-4 filter grayscale-0 contrast-100 brightness-100 transition-all duration-500 ease-out transform ${
+                      isHighlighted ? 'scale-110 brightness-110 drop-shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'scale-100 group-hover:scale-110'
+                    }`}>
+                      {partner.logo}
+                    </div>
+                    
+                    <h3 className={`font-bold text-sm transition-colors duration-350 ${
+                      isHighlighted ? 'text-white' : 'text-slate-300 group-hover:text-white'
+                    }`}>
+                      {partner.name}
+                    </h3>
+                    
+                    <p className={`text-[10px] font-medium transition-colors duration-350 mt-1 ${
+                      isHighlighted ? 'text-slate-300' : 'text-slate-500 group-hover:text-slate-400'
+                    }`}>
+                      {partner.description}
+                    </p>
+                  </SpotlightCard>
+                </a>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>

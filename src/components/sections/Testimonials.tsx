@@ -10,36 +10,36 @@ import { Star, Quote, CheckCircle2, ArrowRight } from 'lucide-react';
 const testimonials = [
   {
     id: 1,
-    client: "Lic. Martha D.",
+    client: "David del Valle",
     business: "Del Valle Asesores",
-    role: "Directora Operativa",
+    role: "Director General",
     highlight: "Optimización del 40% del tiempo",
     quote: "El cotizador digital y portal de clientes que construimos automatizó la atención inicial de prospectos. Nuestros agentes ahora se enfocan únicamente en cierres de pólizas importantes, incrementando el volumen de venta de manera constante.",
     color: "text-emerald-400",
     bg: "bg-emerald-500/10",
-    avatar: "M"
+    avatar: "D"
   },
   {
     id: 2,
-    client: "Alejandro R.",
+    client: "Manuel R.",
     business: "Barbería Fulanos",
     role: "Fundador",
     highlight: "Cero pérdidas por inasistencias",
     quote: "Nuestros clientes ahora agendan por sí mismos a través del sistema web y reciben recordatorios automáticos. Eliminamos por completo los traslapes de citas y las inasistencias de última hora, optimizando la caja diaria.",
     color: "text-orange-400",
     bg: "bg-orange-500/10",
-    avatar: "A"
+    avatar: "M"
   },
   {
     id: 3,
-    client: "Santiago V.",
+    client: "Manuel A.",
     business: "Kofii Club",
     role: "Co-fundador",
     highlight: "+24% en recompras de clientes",
     quote: "La aplicación móvil de pedidos anticipados y el sistema de lealtad inteligente han hecho que la frecuencia de compra de nuestros clientes habituales crezca de forma sostenida. La experiencia móvil es sumamente rápida y fluida.",
     color: "text-blue-400",
     bg: "bg-blue-500/10",
-    avatar: "S"
+    avatar: "M"
   }
 ];
 

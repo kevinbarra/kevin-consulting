@@ -2,7 +2,6 @@
 
 import { Canvas } from '@react-three/fiber';
 import Particles from '@/components/canvas/Particles';
-import TechCore from '@/components/canvas/TechCore';
 import { Suspense } from 'react';
 import { ArrowRight } from 'lucide-react';
 import HowItWorks from '@/components/sections/HowItWorks';
@@ -43,7 +42,6 @@ export default function Home() {
             <pointLight position={[10, 10, 10]} color="#3b82f6" />
             <Suspense fallback={null}>
               <Particles count={400} />
-              <TechCore />
             </Suspense>
           </Canvas>
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0f172a]/20 to-[#0f172a] z-10" />

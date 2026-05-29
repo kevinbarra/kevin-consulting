@@ -487,20 +487,16 @@ export default function ScrollScrubShowcase() {
 
               <div className="relative w-full h-full rounded-2xl overflow-hidden bg-slate-950 flex items-center justify-center">
                 <AnimatePresence mode="wait">
-                  {[0, 1, 2, 3, 4].map((idx) => (
-                    activeIndex === idx && (
-                      <motion.div
-                        key={idx}
-                        initial={{ opacity: 0, scale: 0.95, y: 15 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 1.05, y: -15 }}
-                        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                        className="absolute inset-0 w-full h-full"
-                      >
-                        <ProjectInteractiveMockup id={idx} />
-                      </motion.div>
-                    )
-                  ))}
+                  <motion.div
+                    key={activeIndex}
+                    initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 1.05, y: -15 }}
+                    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                    className="absolute inset-0 w-full h-full"
+                  >
+                    <ProjectInteractiveMockup id={activeIndex} />
+                  </motion.div>
                 </AnimatePresence>
               </div>
 
