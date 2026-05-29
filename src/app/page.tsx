@@ -46,7 +46,7 @@ export default function Home() {
               <TechCore />
             </Suspense>
           </Canvas>
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0f172a]/50 via-[#0f172a]/80 to-[#0f172a] z-10" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0f172a]/20 to-[#0f172a] z-10" />
         </div>
 
         <div className="relative z-20 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">

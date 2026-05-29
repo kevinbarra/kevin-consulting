@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import SpotlightCard from '../layout/SpotlightCard';
 
 const partners = [
@@ -8,15 +9,10 @@ const partners = [
     name: "Kofii",
     url: "#", 
     description: "App de Pedidos & Lealtad",
-    // Modern coffee icon / brand SVG
     logo: (
-      <svg className="w-12 h-12 text-amber-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
-        <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
-        <line x1="6" y1="2" x2="6" y2="4" />
-        <line x1="10" y1="2" x2="10" y2="4" />
-        <line x1="14" y1="2" x2="14" y2="4" />
-      </svg>
+      <div className="relative w-12 h-12 flex items-center justify-center">
+        <Image src="/kofii-logo.png" alt="Kofii logo" fill className="object-contain" />
+      </div>
     ),
     spotlight: "rgba(245, 158, 11, 0.15)"
   },
@@ -24,14 +20,10 @@ const partners = [
     name: "Fulanos Barber",
     url: "https://fulanos.agendabarber.pro/book/fulanos", 
     description: "Sistema de Citas & POS",
-    // Elegant barber scissors / comb style SVG
     logo: (
-      <svg className="w-12 h-12 text-slate-300 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="6" cy="6" r="3" />
-        <circle cx="6" cy="18" r="3" />
-        <line x1="9.8" y1="8.2" x2="20" y2="17" />
-        <line x1="9.8" y1="15.8" x2="20" y2="7" />
-      </svg>
+      <div className="relative w-12 h-12 flex items-center justify-center">
+        <Image src="/fulanos-logo.png" alt="Fulanos Barber logo" fill className="object-contain" />
+      </div>
     ),
     spotlight: "rgba(255, 255, 255, 0.1)"
   },
@@ -39,10 +31,14 @@ const partners = [
     name: "Del Valle Asesores",
     url: "https://delvalleasesores.mx/", 
     description: "Portal de Clientes & Cotizador",
-    // Shield representing protection / insurance SVG
     logo: (
-      <svg className="w-12 h-12 text-emerald-400 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <svg viewBox="0 0 380 90" className="h-6 w-[110px] text-emerald-400 fill-current" xmlns="http://www.w3.org/2000/svg">
+        <g transform="translate(5, 5)">
+          <path d="M 10 5 L 35 5 A 35 35 0 0 1 35 75 L 10 75 Z" stroke="currentColor" strokeWidth="6" fill="none" strokeLinejoin="round"></path>
+          <path d="M 20 15 L 35 15 A 25 25 0 0 1 35 65 L 20 65 Z" stroke="currentColor" strokeWidth="6" fill="none" strokeLinejoin="round"></path>
+        </g>
+        <text x="95" y="42" fontFamily="'Plus Jakarta Sans', sans-serif" fontWeight="900" fontSize="36" fill="currentColor" letterSpacing="1">DEL VALLE</text>
+        <text x="97" y="72" fontFamily="'Plus Jakarta Sans', sans-serif" fontWeight="400" fontSize="24" fill="currentColor" letterSpacing="5.5">ASESORES</text>
       </svg>
     ),
     spotlight: "rgba(52, 211, 153, 0.15)"
