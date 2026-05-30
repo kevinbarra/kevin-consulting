@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Copy, Check, FileText, AlertCircle, Calculator, Building, User, Upload, Download, RefreshCw, KeyRound, ShieldAlert, DollarSign } from 'lucide-react';
+import { X, Copy, Check, FileText, AlertCircle, Calculator, Building, User, Upload, Download, RefreshCw, KeyRound, ShieldAlert, DollarSign, FolderKanban } from 'lucide-react';
 import { Client, calculateMexicanTaxes } from './mockData';
 import { uploadDocumentAction, getClientDocumentsAction } from '@/app/portal/actions/documentActions';
 import { usePortalSim } from '@/app/portal/PortalClientLayout';
 import { resetClientPasswordAction } from '@/app/portal/actions/adminActions';
+import { ContractService } from '@/types';
 
 interface DrawerProps {
   isOpen: boolean;
@@ -33,11 +34,50 @@ export default function Drawer({ isOpen, onClose, client }: DrawerProps) {
   const [isCreatingBilling, setIsCreatingBilling] = useState(false);
   const [billError, setBillError] = useState<string | null>(null);
   const [billingSuccess, setBillingSuccess] = useState(false);
+  // NEW: service linkage
+  const [billServiceId, setBillServiceId] = useState<string>('');
+  const [clientServices, setClientServices] = useState<ContractService[]>([]);
+  const [isLoadingServices, setIsLoadingServices] = useState(false);
+
+  // Invoice download state
+  const [downloadingBillingId, setDownloadingBillingId] = useState<string | null>(null);
+  const [invoiceModal, setInvoiceModal] = useState<{ open: boolean; payload: any | null }>({ open: false, payload: null });
 
   const getFutureDateStr = (daysAhead: number) => {
     const d = new Date();
     d.setDate(d.getDate() + daysAhead);
     return d.toISOString().substring(0, 10);
+  };
+
+  // Fetch client services when drawer opens
+  useEffect(() => {
+    if (isOpen && client && role === 'admin') {
+      setIsLoadingServices(true);
+      fetch(`/api/contracts-services?client_id=${client.id}`)
+        .then(res => res.json())
+        .then(data => setClientServices(Array.isArray(data) ? data : []))
+        .catch(() => setClientServices([]))
+        .finally(() => setIsLoadingServices(false));
+    }
+    if (!isOpen) {
+      setClientServices([]);
+      setBillServiceId('');
+    }
+  }, [isOpen, client, role]);
+
+  // Download and display invoice for a billing
+  const handleDownloadInvoice = async (billingId: string) => {
+    setDownloadingBillingId(billingId);
+    try {
+      const res = await fetch(`/api/invoices?billing_id=${billingId}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al obtener el comprobante.');
+      setInvoiceModal({ open: true, payload: data });
+    } catch (err: any) {
+      alert(err.message || 'Error al obtener comprobante.');
+    } finally {
+      setDownloadingBillingId(null);
+    }
   };
 
   const handleCreateBilling = async (e: React.FormEvent) => {
@@ -65,6 +105,7 @@ export default function Drawer({ isOpen, onClose, client }: DrawerProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           client_id: client.id,
+          service_id: billServiceId || null,   // NEW
           concept: billConcept.trim(),
           amount: amountNum,
           status: billStatus,
@@ -544,6 +585,43 @@ export default function Drawer({ isOpen, onClose, client }: DrawerProps) {
 
                   {isBillingFormOpen && (
                     <form onSubmit={handleCreateBilling} className="p-4 border border-white/5 bg-slate-900/30 rounded-2xl space-y-4 animate-in slide-in-from-top-2">
+
+                      {/* Service / Project Selector */}
+                      <div className="space-y-1">
+                        <label className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block flex items-center gap-1.5">
+                          <FolderKanban size={11} className="text-blue-400" />
+                          Servicio / Proyecto Vinculado (Opcional)
+                        </label>
+                        {isLoadingServices ? (
+                          <div className="flex items-center gap-2 text-slate-500 text-[10px] py-1">
+                            <RefreshCw className="animate-spin" size={12} />
+                            Cargando servicios...
+                          </div>
+                        ) : (
+                          <select
+                            value={billServiceId}
+                            onChange={(e) => setBillServiceId(e.target.value)}
+                            className="w-full px-2 py-2 bg-slate-950 border border-white/10 focus:border-blue-500 rounded-xl text-xs text-white focus:outline-none transition-colors"
+                          >
+                            <option value="">— Sin servicio vinculado —</option>
+                            {clientServices.map((svc) => (
+                              <option key={svc.id} value={svc.id}>
+                                {svc.service_name}
+                                {svc.service_type === 'instalacion_proyecto'
+                                  ? ` (Proyecto · Saldo: $${svc.current_balance.toLocaleString('es-MX', { minimumFractionDigits: 2 })})`
+                                  : ' (Recurrente)'}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                        {billServiceId && clientServices.find(s => s.id === billServiceId)?.service_type === 'instalacion_proyecto' && (
+                          <p className="text-[9px] text-amber-400 font-medium flex items-center gap-1">
+                            <AlertCircle size={10} />
+                            Si se marca como 'Pagado', el abono se descontará automáticamente del saldo del proyecto.
+                          </p>
+                        )}
+                      </div>
+
                       <div className="space-y-1">
                         <label className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block font-sans">Concepto *</label>
                         <input
@@ -555,6 +633,7 @@ export default function Drawer({ isOpen, onClose, client }: DrawerProps) {
                           className="w-full px-3 py-2 bg-slate-950/60 border border-white/10 focus:border-blue-500 rounded-xl text-xs text-white focus:outline-none transition-colors"
                         />
                       </div>
+
 
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
@@ -915,8 +994,121 @@ export default function Drawer({ isOpen, onClose, client }: DrawerProps) {
               </div>
             </div>
           )}
+
+          {/* ─── MODAL DE COMPROBANTE / INVOICE ─────────────────────────────── */}
+          {invoiceModal.open && invoiceModal.payload && (
+            <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+              <div
+                className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+                onClick={() => setInvoiceModal({ open: false, payload: null })}
+              />
+              <div className="relative w-full max-w-md bg-[#090d16]/98 border border-white/10 rounded-3xl p-6 text-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 z-10 space-y-4">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 bg-blue-600 rounded flex items-center justify-center font-bold text-sm">K</div>
+                    <div>
+                      <div className="text-xs font-bold text-white">Kevin Consulting</div>
+                      <div className="text-[9px] text-slate-400">Comprobante Digital</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setInvoiceModal({ open: false, payload: null })}
+                    className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 hover:text-white transition-colors"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                {/* Case B: processing_sat */}
+                {invoiceModal.payload.status === 'processing_sat' && (
+                  <div className="p-4 border border-amber-500/20 bg-amber-500/5 rounded-2xl space-y-2 text-center">
+                    <div className="text-2xl">🧾</div>
+                    <p className="text-sm font-bold text-amber-400">Factura en proceso de timbrado</p>
+                    <p className="text-xs text-slate-400 leading-relaxed font-light">
+                      {invoiceModal.payload.message}
+                    </p>
+                    <div className="text-[9px] text-slate-500 mt-1 font-mono">ID: {invoiceModal.payload.billing_id}</div>
+                  </div>
+                )}
+
+                {/* Case A: SAT data */}
+                {invoiceModal.payload.status === 'ok' && invoiceModal.payload.sat_data && (
+                  <div className="space-y-3">
+                    <div className="p-3 border border-blue-500/10 bg-blue-500/5 rounded-xl text-[10px] space-y-1.5">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">RFC:</span>
+                        <span className="font-mono font-bold text-white">{invoiceModal.payload.sat_data.rfc}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Razón Social:</span>
+                        <span className="font-bold text-white text-right max-w-[60%] truncate">{invoiceModal.payload.sat_data.legal_name}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">UUID SAT:</span>
+                        <span className="font-mono text-emerald-400 text-[9px]">{invoiceModal.payload.sat_data.sat_uuid}</span>
+                      </div>
+                    </div>
+                    <table className="w-full text-[10px] border border-white/10 rounded-xl overflow-hidden">
+                      <tbody className="divide-y divide-white/5 text-slate-300">
+                        <tr><td className="p-2.5 font-light">Subtotal</td><td className="p-2.5 text-right font-bold text-white">${invoiceModal.payload.sat_data.subtotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td></tr>
+                        <tr><td className="p-2.5 font-light">IVA (16%)</td><td className="p-2.5 text-right font-bold text-white">${invoiceModal.payload.sat_data.iva.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td></tr>
+                        {invoiceModal.payload.sat_data.retencion_isr && (
+                          <tr className="text-rose-400"><td className="p-2.5 font-light">Ret. ISR (1.25%)</td><td className="p-2.5 text-right font-bold">-${invoiceModal.payload.sat_data.retencion_isr.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td></tr>
+                        )}
+                        {invoiceModal.payload.sat_data.retencion_iva && (
+                          <tr className="text-rose-400"><td className="p-2.5 font-light">Ret. IVA (10.66%)</td><td className="p-2.5 text-right font-bold">-${invoiceModal.payload.sat_data.retencion_iva.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td></tr>
+                        )}
+                        <tr className="bg-white/[0.03] text-white"><td className="p-2.5 font-bold">Total Neto</td><td className="p-2.5 text-right font-black text-emerald-400">${invoiceModal.payload.sat_data.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* Case C: Internal receipt */}
+                {invoiceModal.payload.status === 'ok' && invoiceModal.payload.internal_receipt && (
+                  <div className="space-y-3">
+                    <div className="p-3 border border-emerald-500/15 bg-emerald-500/5 rounded-xl text-[10px] space-y-1.5">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Concepto:</span>
+                        <span className="font-bold text-white text-right max-w-[60%]">{invoiceModal.payload.internal_receipt.concept}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Emitido a:</span>
+                        <span className="font-bold text-white">{invoiceModal.payload.internal_receipt.issued_to}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Fecha de Pago:</span>
+                        <span className="font-mono text-white">{new Date(invoiceModal.payload.internal_receipt.payment_date).toLocaleDateString('es-MX')}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Monto:</span>
+                        <span className="font-black text-emerald-400">${invoiceModal.payload.internal_receipt.amount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                      </div>
+                    </div>
+                    <div className="p-3 border border-white/5 bg-slate-950/60 rounded-xl space-y-1.5">
+                      <div className="text-[9px] text-slate-500 uppercase tracking-widest">Firma Digital Interna</div>
+                      <div className="flex items-center justify-between gap-2">
+                        <code className="text-[9px] font-mono text-blue-400 break-all flex-1">{invoiceModal.payload.internal_receipt.signature}</code>
+                        <button
+                          onClick={() => copyToClipboard(invoiceModal.payload.internal_receipt.signature, 'invoiceSig')}
+                          className="p-1.5 rounded-lg bg-white/5 hover:bg-blue-600/20 border border-white/5 text-slate-400 hover:text-blue-400 transition-all shrink-0"
+                        >
+                          {copiedField === 'invoiceSig' ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-[9px] text-slate-500 font-light text-center">
+                      Emitido por {invoiceModal.payload.internal_receipt.issued_by} · Comprobante de control interno
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </>
       )}
     </AnimatePresence>
   );
 }
+

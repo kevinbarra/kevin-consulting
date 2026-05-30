@@ -1,6 +1,7 @@
 export type UserRole = 'admin' | 'client';
 export type BillingStatus = 'pagado' | 'pendiente' | 'atrasado';
 export type DocumentTypeEnum = 'Contrato' | 'Addendum' | 'CSF';
+export type ServiceType = 'recurrente' | 'instalacion_proyecto';
 
 export interface User {
   id: string;
@@ -26,6 +27,7 @@ export interface Client {
 export interface Billing {
   id: string;
   client_id: string;
+  service_id?: string | null; // FK to contracts_services — optional
   concept: string;
   amount: number;
   status: BillingStatus;
@@ -34,6 +36,19 @@ export interface Billing {
   sat_uuid?: string | null; // Optional/nullable to support fiscal_tracked = false
   due_date: string; // ISO date string YYYY-MM-DD
   paid_at?: string | null;
+  payment_date?: string | null;
+  created_at: string;
+}
+
+// Represents a row in the contracts_services table
+export interface ContractService {
+  id: string;
+  client_id: string;
+  service_name: string;
+  service_type: ServiceType;
+  total_amount: number;
+  current_balance: number;
+  is_active: boolean;
   created_at: string;
 }
 
@@ -78,4 +93,36 @@ export interface BillingResponse {
   
   // The absolute total amount paid/due. If fiscal_tracked is false, this is identical to amount.
   total: number;
+}
+
+// Response type for GET /api/invoices
+export type InvoiceStatus = 'ok' | 'processing_sat';
+
+export interface InvoiceResponse {
+  status: InvoiceStatus;
+  billing_id: string;
+  fiscal_tracked: boolean;
+  // If status === 'processing_sat'
+  message?: string;
+  // If fiscal_tracked = true and sat_uuid exists
+  sat_data?: {
+    sat_uuid: string;
+    rfc: string;
+    legal_name: string;
+    subtotal: number;
+    iva: number;
+    retencion_isr?: number;
+    retencion_iva?: number;
+    total: number;
+  };
+  // If fiscal_tracked = false
+  internal_receipt?: {
+    signature: string;       // kc_internal_sec_[UUID]_verify_sha256
+    concept: string;
+    amount: number;
+    payment_date: string;
+    issued_to: string;       // business_name
+    issued_by: string;       // 'Kevin Consulting'
+    billing_id: string;
+  };
 }

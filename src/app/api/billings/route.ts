@@ -131,6 +131,11 @@ export async function GET(req: NextRequest) {
  * POST /api/billings
  * Restrict to: Admin
  * Inserts a new billing/charge entry for a client.
+ *
+ * Balance deduction logic:
+ *  - If service_id is present, status === 'pagado', service_type === 'instalacion_proyecto',
+ *    AND amount > 0, then contracts_services.current_balance is decremented atomically within
+ *    the same transaction (NUMERIC(12,2) precision, no negative balance).
  */
 export async function POST(req: NextRequest) {
   try {
@@ -146,6 +151,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const {
       client_id,
+      service_id,       // NEW: optional FK to contracts_services
       concept,
       amount,
       status,
@@ -156,9 +162,9 @@ export async function POST(req: NextRequest) {
       paid_at,
     } = body;
 
-    // Validate parameters
+    // Validate required parameters
     if (!client_id || !concept || amount === undefined || !status || !due_date) {
-      return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing required parameters: client_id, concept, amount, status, due_date' }, { status: 400 });
     }
 
     const numericAmount = parseFloat(amount);
@@ -167,36 +173,88 @@ export async function POST(req: NextRequest) {
     }
 
     const newBilling = await queryWithRLS(session.user.id, 'admin', async (dbClient) => {
-      // Confirm target client profile exists
+      // --- 1. Confirm target client profile exists ---
       const clientCheck = await dbClient.query('SELECT id FROM clients WHERE id = $1', [client_id]);
       if (clientCheck.rows.length === 0) {
         throw new Error('CLIENT_NOT_FOUND');
       }
 
-      const res = await dbClient.query(
+      // --- 2. If a service is linked, verify it belongs to the same client ---
+      let linkedServiceType: string | null = null;
+      if (service_id) {
+        const serviceCheck = await dbClient.query(
+          'SELECT service_type FROM contracts_services WHERE id = $1 AND client_id = $2',
+          [service_id, client_id]
+        );
+        if (serviceCheck.rows.length === 0) {
+          throw new Error('SERVICE_NOT_FOUND');
+        }
+        linkedServiceType = serviceCheck.rows[0].service_type;
+      }
+
+      // --- 3. Determine the exact payment timestamp ---
+      // Use paid_at from payload when provided; otherwise fall back to NOW() if status is 'pagado'
+      const resolvedPaidAt = status === 'pagado'
+        ? (paid_at || new Date().toISOString())
+        : null;
+
+      // --- 4. Insert the billing record ---
+      const billingInsertRes = await dbClient.query(
         `INSERT INTO billings (
-          client_id, concept, amount, status, payment_form, bank_destination, sat_uuid, due_date, paid_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+          client_id, service_id, concept, amount, status,
+          payment_form, bank_destination, sat_uuid,
+          due_date, paid_at, payment_date
+        ) VALUES ($1, $2, $3, $4::numeric, $5, $6, $7, $8, $9, $10, $11)
+        RETURNING *`,
         [
           client_id,
+          service_id || null,
           concept,
-          numericAmount,
+          numericAmount,          // stored as NUMERIC(12,2) by the DB column constraint
           status,
           payment_form || null,
           bank_destination || null,
           sat_uuid || null,
           due_date,
-          paid_at || null,
+          resolvedPaidAt,
+          resolvedPaidAt,         // payment_date mirrors paid_at for conciliation purposes
         ]
       );
-      return res.rows[0];
+
+      const insertedBilling = billingInsertRes.rows[0];
+
+      // --- 5. Auto-deduct balance for 'instalacion_proyecto' services ---
+      // Guard clause: amount must be > 0 (user-confirmed precision requirement)
+      if (
+        service_id &&
+        status === 'pagado' &&
+        linkedServiceType === 'instalacion_proyecto' &&
+        numericAmount > 0
+      ) {
+        await dbClient.query(
+          `UPDATE contracts_services
+           SET current_balance = GREATEST(0, current_balance - $1::numeric)
+           WHERE id = $2
+             AND client_id = $3
+             AND $1::numeric > 0`,
+          [numericAmount, service_id, client_id]
+        );
+      }
+
+      return insertedBilling;
     });
 
-    return NextResponse.json({ message: 'Billing created successfully', billing: newBilling }, { status: 201 });
+    return NextResponse.json(
+      { message: 'Billing created successfully', billing: newBilling },
+      { status: 201 }
+    );
   } catch (error: any) {
-    console.error('Error creating billing:', error);
+    console.error('[POST /api/billings] Error:', error);
     if (error.message === 'CLIENT_NOT_FOUND') {
       return NextResponse.json({ error: 'Bad Request: Selected client profile does not exist' }, { status: 400 });
+    }
+    if (error.message === 'SERVICE_NOT_FOUND') {
+      return NextResponse.json({ error: 'Bad Request: Service does not exist or does not belong to this client' }, { status: 400 });
     }
     return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
   }
