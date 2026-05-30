@@ -38,8 +38,8 @@ async function run() {
     console.log("Tables, indexes, and RLS policies created successfully!");
 
     console.log("Checking for initial admin user...");
-    const adminEmail = 'admin@kevinconsulting.services';
-    const adminPassword = 'AdminTempPass123!';
+    const adminEmail = 'kevinbarra2001@gmail.com';
+    const adminPassword = 'villarica2080';
     
     const checkRes = await client.query('SELECT id FROM users WHERE email = $1', [adminEmail]);
     if (checkRes.rows.length === 0) {
