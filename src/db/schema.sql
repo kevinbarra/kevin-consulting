@@ -20,6 +20,9 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'document_type_enum') THEN
         CREATE TYPE document_type_enum AS ENUM ('Contrato', 'Addendum', 'CSF');
     END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'service_type') THEN
+        CREATE TYPE service_type AS ENUM ('recurrente', 'instalacion_proyecto');
+    END IF;
 END$$;
 
 -- --------------------------------------------------------------------
@@ -53,12 +56,25 @@ CREATE TABLE IF NOT EXISTS clients (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+-- Tabla: contracts_services
+-- Almacena los contratos o servicios específicos del cliente (modelo 1:N)
+CREATE TABLE IF NOT EXISTS contracts_services (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    client_id UUID NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+    service_name VARCHAR(255) NOT NULL,
+    service_type service_type NOT NULL,
+    total_amount NUMERIC(12, 2) NOT NULL CHECK (total_amount >= 0.00),
+    current_balance NUMERIC(12, 2) NOT NULL CHECK (current_balance >= 0.00), -- Evita saldos negativos
+    is_active BOOLEAN DEFAULT TRUE NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
 
 -- Tabla: billings
 -- Almacena los registros de facturación y cobranza (conciliación fiscal)
 CREATE TABLE IF NOT EXISTS billings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     client_id UUID NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+    service_id UUID REFERENCES contracts_services(id) ON DELETE SET NULL, -- Relación con el servicio
     concept VARCHAR(255) NOT NULL,
     amount NUMERIC(12, 2) NOT NULL CHECK (amount >= 0.00), -- Exacto, previene redondeos para el SAT
     status billing_status NOT NULL,
@@ -67,6 +83,9 @@ CREATE TABLE IF NOT EXISTS billings (
     sat_uuid UUID, -- Almacena UUID del SAT de 36 caracteres de forma nativa
     due_date DATE NOT NULL,
     paid_at TIMESTAMPTZ,
+    amount_paid NUMERIC(12, 2) DEFAULT 0.00 CHECK (amount_paid >= 0.00), -- Abonos de pago
+    payment_date TIMESTAMPTZ,
+    internal_invoice_url TEXT,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
@@ -81,24 +100,25 @@ CREATE TABLE IF NOT EXISTS documents (
     uploaded_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+-- Tabla: system_logs
+-- Registra eventos de automatización del sistema (como la ejecución del cron job)
+CREATE TABLE IF NOT EXISTS system_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    event_type VARCHAR(100) NOT NULL,
+    message TEXT NOT NULL,
+    details JSONB,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
 -- --------------------------------------------------------------------
 -- 3. ESTRUCTURA DE ÍNDICES DE RENDIMIENTO
 -- --------------------------------------------------------------------
-
--- Índice implícito único: PostgreSQL ya indexa 'users(email)' y 'clients(user_id)' por restricciones UNIQUE.
-
--- Optimización de búsquedas y uniones en Billings por client_id
 CREATE INDEX IF NOT EXISTS idx_billings_client_id ON billings(client_id);
-
--- Optimización de reportes administrativos globales por estatus
 CREATE INDEX IF NOT EXISTS idx_billings_status ON billings(status);
-
--- Índice compuesto vital para la sección "Mi Cuenta" del portal de clientes
--- Agiliza de forma dramática consultas como "obtener facturas pendientes del cliente X"
 CREATE INDEX IF NOT EXISTS idx_billings_client_status ON billings(client_id, status);
-
--- Optimización de búsquedas y carga de documentos por cliente
 CREATE INDEX IF NOT EXISTS idx_documents_client_id ON documents(client_id);
+CREATE INDEX IF NOT EXISTS idx_contracts_services_client_id ON contracts_services(client_id);
+CREATE INDEX IF NOT EXISTS idx_billings_service_id ON billings(service_id);
 
 -- --------------------------------------------------------------------
 -- 4. SEGURIDAD A NIVEL DE FILA (ROW LEVEL SECURITY - RLS)
@@ -111,6 +131,9 @@ ALTER TABLE users FORCE ROW LEVEL SECURITY;
 ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
 ALTER TABLE clients FORCE ROW LEVEL SECURITY;
 
+ALTER TABLE contracts_services ENABLE ROW LEVEL SECURITY;
+ALTER TABLE contracts_services FORCE ROW LEVEL SECURITY;
+
 ALTER TABLE billings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE billings FORCE ROW LEVEL SECURITY;
 
@@ -120,12 +143,11 @@ ALTER TABLE documents FORCE ROW LEVEL SECURITY;
 -- Limpieza de políticas previas para evitar colisiones
 DROP POLICY IF EXISTS users_policy ON users;
 DROP POLICY IF EXISTS clients_policy ON clients;
+DROP POLICY IF EXISTS contracts_services_policy ON contracts_services;
 DROP POLICY IF EXISTS billings_policy ON billings;
 DROP POLICY IF EXISTS documents_policy ON documents;
 
--- Política para: users
--- - El administrador puede ver/modificar todo.
--- - El cliente sólo puede interactuar con su propio registro de usuario.
+-- Políticas de RLS
 CREATE POLICY users_policy ON users
     FOR ALL
     USING (
@@ -137,9 +159,6 @@ CREATE POLICY users_policy ON users
         OR id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
     );
 
--- Política para: clients
--- - El administrador puede ver/modificar todo.
--- - El cliente sólo puede interactuar con su propia información de perfil de cliente.
 CREATE POLICY clients_policy ON clients
     FOR ALL
     USING (
@@ -151,9 +170,23 @@ CREATE POLICY clients_policy ON clients
         OR user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
     );
 
--- Política para: billings
--- - El administrador puede ver/modificar todo.
--- - El cliente sólo puede interactuar con facturas que pertenezcan a su perfil de cliente.
+CREATE POLICY contracts_services_policy ON contracts_services
+    FOR ALL
+    USING (
+        NULLIF(current_setting('app.current_user_role', true), '') = 'admin'
+        OR client_id IN (
+            SELECT id FROM clients
+            WHERE user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
+        )
+    )
+    WITH CHECK (
+        NULLIF(current_setting('app.current_user_role', true), '') = 'admin'
+        OR client_id IN (
+            SELECT id FROM clients
+            WHERE user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
+        )
+    );
+
 CREATE POLICY billings_policy ON billings
     FOR ALL
     USING (
@@ -171,9 +204,6 @@ CREATE POLICY billings_policy ON billings
         )
     );
 
--- Política para: documents
--- - El administrador puede ver/modificar todo.
--- - El cliente sólo puede interactuar con documentos vinculados a su perfil de cliente.
 CREATE POLICY documents_policy ON documents
     FOR ALL
     USING (
@@ -190,14 +220,3 @@ CREATE POLICY documents_policy ON documents
             WHERE user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
         )
     );
-
--- Tabla: system_logs
--- Registra eventos de automatización del sistema (como la ejecución del cron job)
-CREATE TABLE IF NOT EXISTS system_logs (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    event_type VARCHAR(100) NOT NULL,
-    message TEXT NOT NULL,
-    details JSONB,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
-

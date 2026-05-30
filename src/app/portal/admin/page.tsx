@@ -162,6 +162,10 @@ export default function AdminPage() {
   const activeContractsCount = clientData.reduce((acc, curr) => acc + curr.contracts.length, 0);
   const totalClientsCount = clientData.length;
 
+  // MRR: suma de subtotales mensuales recurrentes de todos los clientes.
+  // Se usa Number() explícitamente porque Neon devuelve NUMERIC(12,2) como string.
+  const totalMRR = clientData.reduce((acc, curr) => acc + (Number(curr.subtotal) || 0), 0);
+
   const handleClientClick = (client: Client) => {
     setSelectedClient(client);
     setIsDrawerOpen(true);
@@ -246,15 +250,18 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* KPI 3 */}
-        <div className="p-5 rounded-2xl border border-white/10 bg-[#1e293b]/20 backdrop-blur-md flex items-center justify-between">
+        {/* KPI 3 — MRR Total */}
+        <div className="p-5 rounded-2xl border border-emerald-500/20 bg-[#1e293b]/20 backdrop-blur-md flex items-center justify-between shadow-[0_0_20px_rgba(16,185,129,0.05)]">
           <div className="space-y-1">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Expedientes Digitales</span>
-            <div className="text-xl font-black text-white">{activeContractsCount}</div>
-            <span className="text-[10px] text-slate-400 font-light">Contratos firmados PDF</span>
+            <span className="text-[10px] uppercase font-bold text-slate-400">MRR Total</span>
+            <div className="text-xl font-black text-emerald-400">{formatCurrency(totalMRR)}</div>
+            <span className="text-[10px] text-emerald-500/70 flex items-center gap-1 font-semibold">
+              <TrendingUp size={12} />
+              Ingreso mensual recurrente
+            </span>
           </div>
           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-            <FileCheck size={20} />
+            <TrendingUp size={20} />
           </div>
         </div>
 
