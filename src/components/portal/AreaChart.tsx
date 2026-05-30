@@ -1,0 +1,373 @@
+'use client';
+
+import { useRef, useState } from 'react';
+import { motion } from 'framer-motion';
+import { mockCashFlow, CashFlowData } from './mockData';
+import { TrendingUp, Award, DollarSign } from 'lucide-react';
+
+export default function AreaChart() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [hoverData, setHoverData] = useState<{
+    index: number;
+    x: number;
+    y: number;
+    item: CashFlowData;
+  } | null>(null);
+
+  // Dimensiones internas del canvas de SVG
+  const width = 600;
+  const height = 300;
+  const paddingLeft = 60;
+  const paddingRight = 20;
+  const paddingTop = 30;
+  const paddingBottom = 40;
+
+  const plotWidth = width - paddingLeft - paddingRight;
+  const plotHeight = height - paddingTop - paddingBottom;
+
+  // Rango de datos (0 a 300,000 MXN)
+  const maxValue = 300000;
+
+  // Mapear un punto a coordenadas SVG
+  const getCoordinates = (index: number, value: number) => {
+    const x = paddingLeft + (index * (plotWidth / (mockCashFlow.length - 1)));
+    const y = paddingTop + plotHeight - ((value / maxValue) * plotHeight);
+    return { x, y };
+  };
+
+  // Generar las coordenadas de los puntos
+  const realPoints = mockCashFlow.map((d, i) => getCoordinates(i, d.real));
+  const satPoints = mockCashFlow.map((d, i) => getCoordinates(i, d.sat));
+
+  // Crear strings de caminos (paths) para SVG
+  const createLinePath = (points: { x: number; y: number }[]) => {
+    return points.reduce((acc, p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `${acc} L ${p.x} ${p.y}`), '');
+  };
+
+  const createAreaPath = (points: { x: number; y: number }[]) => {
+    if (points.length === 0) return '';
+    const linePath = createLinePath(points);
+    const bottomY = paddingTop + plotHeight;
+    return `${linePath} L ${points[points.length - 1].x} ${bottomY} L ${points[0].x} ${bottomY} Z`;
+  };
+
+  const realLinePath = createLinePath(realPoints);
+  const realAreaPath = createAreaPath(realPoints);
+
+  const satLinePath = createLinePath(satPoints);
+  const satAreaPath = createAreaPath(satPoints);
+
+  // Manejar el movimiento del mouse para la interactividad
+  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
+    if (!containerRef.current) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    
+    // Convertir de coordenadas del DOM a coordenadas internas del SVG (0-600)
+    const scaleX = width / rect.width;
+    const svgX = mouseX * scaleX;
+
+    // Encontrar el punto de datos más cercano en el eje X
+    let closestIndex = 0;
+    let minDiff = Infinity;
+
+    for (let i = 0; i < mockCashFlow.length; i++) {
+      const { x } = getCoordinates(i, 0);
+      const diff = Math.abs(svgX - x);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closestIndex = i;
+      }
+    }
+
+    const { x, y } = getCoordinates(closestIndex, mockCashFlow[closestIndex].real);
+    
+    // Obtener la posición del tooltip en píxeles del DOM
+    const ratioX = rect.width / width;
+    const ratioY = rect.height / height;
+    
+    setHoverData({
+      index: closestIndex,
+      x: x * ratioX,
+      y: y * ratioY - 15,
+      item: mockCashFlow[closestIndex],
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setHoverData(null);
+  };
+
+  // Formato para pesos mexicanos
+  const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      maximumFractionDigits: 0,
+    }).format(val);
+  };
+
+  // Diferencia porcentual del último mes
+  const lastMonth = mockCashFlow[mockCashFlow.length - 1];
+  const flowDiff = ((lastMonth.real - lastMonth.sat) / lastMonth.sat) * 100;
+
+  return (
+    <div className="flex flex-col h-full justify-between" ref={containerRef}>
+      {/* Cabecera del Gráfico */}
+      <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
+        <div>
+          <h3 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+            Flujo de Caja
+            <span className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1 font-semibold animate-pulse">
+              <TrendingUp size={12} />
+              +{flowDiff.toFixed(1)}% Real vs SAT
+            </span>
+          </h3>
+          <p className="text-slate-400 text-xs font-light">Comparativa mensual de ingresos depositados vs facturados.</p>
+        </div>
+
+        {/* Leyenda interactiva */}
+        <div className="flex gap-4 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
+            <span className="text-slate-300 font-medium">Ingreso Real</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+            <span className="text-slate-300 font-medium">Timbrado SAT</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Contenedor del Gráfico SVG */}
+      <div className="relative flex-1 min-h-[200px] w-full">
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          width="100%"
+          height="100%"
+          className="overflow-visible select-none cursor-crosshair"
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+        >
+          {/* Definiciones de Gradiantes y Filtros de Brillo */}
+          <defs>
+            <linearGradient id="realGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
+            </linearGradient>
+            <linearGradient id="satGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+            </linearGradient>
+            <filter id="glowReal" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+            <filter id="glowSat" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+
+          {/* Líneas de Guía Horizontal (Grid) */}
+          {[0, 100000, 200000, 300000].map((val, i) => {
+            const y = paddingTop + plotHeight - ((val / maxValue) * plotHeight);
+            return (
+              <g key={i} className="opacity-20">
+                <line
+                  x1={paddingLeft}
+                  y1={y}
+                  x2={width - paddingRight}
+                  y2={y}
+                  stroke="#ffffff"
+                  strokeWidth="1"
+                  strokeDasharray="4,4"
+                />
+                {/* Etiquetas Y */}
+                <text
+                  x={paddingLeft - 10}
+                  y={y + 4}
+                  fill="#94a3b8"
+                  fontSize="10"
+                  textAnchor="end"
+                  className="font-light"
+                >
+                  {val === 0 ? '$0' : `${val / 1000}k`}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Eje X y Etiquetas */}
+          {mockCashFlow.map((d, i) => {
+            const { x } = getCoordinates(i, 0);
+            return (
+              <text
+                key={i}
+                x={x}
+                y={height - 15}
+                fill="#94a3b8"
+                fontSize="11"
+                textAnchor="middle"
+                className="font-light"
+              >
+                {d.month}
+              </text>
+            );
+          })}
+
+          {/* Áreas degradadas de fondo (Dibujadas primero) */}
+          <motion.path
+            d={satAreaPath}
+            fill="url(#satGrad)"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          />
+          <motion.path
+            d={realAreaPath}
+            fill="url(#realGrad)"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          />
+
+          {/* Línea Timbrado SAT */}
+          <motion.path
+            d={satLinePath}
+            fill="none"
+            stroke="#10b981"
+            strokeWidth="3.5"
+            filter="url(#glowSat)"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 1.2, ease: 'easeInOut' }}
+          />
+
+          {/* Línea Ingreso Real */}
+          <motion.path
+            d={realLinePath}
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth="3.5"
+            filter="url(#glowReal)"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 1.2, ease: 'easeInOut', delay: 0.2 }}
+          />
+
+          {/* Puntos y Glow de Puntos en Vértices */}
+          {realPoints.map((p, i) => (
+            <circle
+              key={i}
+              cx={p.x}
+              cy={p.y}
+              r={hoverData?.index === i ? "6" : "3.5"}
+              className="fill-blue-500 stroke-slate-900 stroke-2 transition-all duration-200"
+              style={{
+                filter: hoverData?.index === i ? 'drop-shadow(0 0 6px rgba(59, 130, 246, 0.8))' : 'none',
+              }}
+            />
+          ))}
+
+          {satPoints.map((p, i) => (
+            <circle
+              key={i}
+              cx={p.x}
+              cy={p.y}
+              r={hoverData?.index === i ? "6" : "3.5"}
+              className="fill-emerald-500 stroke-slate-900 stroke-2 transition-all duration-200"
+              style={{
+                filter: hoverData?.index === i ? 'drop-shadow(0 0 6px rgba(16, 185, 129, 0.8))' : 'none',
+              }}
+            />
+          ))}
+
+          {/* Línea Vertical Interactiva (Guía) */}
+          {hoverData && (
+            <line
+              x1={getCoordinates(hoverData.index, 0).x}
+              y1={paddingTop}
+              x2={getCoordinates(hoverData.index, 0).x}
+              y2={paddingTop + plotHeight}
+              stroke="#ffffff"
+              strokeWidth="1.5"
+              strokeDasharray="2,2"
+              className="opacity-40"
+            />
+          )}
+        </svg>
+
+        {/* Tooltip flotante HTML */}
+        {hoverData && (
+          <div
+            className="absolute z-20 pointer-events-none p-4 rounded-2xl bg-slate-950/90 border border-white/15 backdrop-blur-md shadow-2xl flex flex-col gap-2 min-w-[210px] text-xs font-sans transition-all duration-100 ease-out"
+            style={{
+              left: `${hoverData.x}px`,
+              top: `${hoverData.y - 80}px`,
+              transform: 'translateX(-50%)',
+            }}
+          >
+            <div className="font-semibold text-slate-300 border-b border-white/10 pb-1 flex justify-between">
+              <span>Mes de {hoverData.item.month}</span>
+              <span className="text-blue-400">Detalles</span>
+            </div>
+            
+            <div className="flex justify-between items-center mt-1">
+              <span className="text-slate-400 font-light flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-blue-500" />
+                Ingreso Real:
+              </span>
+              <span className="font-bold text-white text-right">
+                {formatCurrency(hoverData.item.real)}
+              </span>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <span className="text-slate-400 font-light flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                Timbrado SAT:
+              </span>
+              <span className="font-bold text-emerald-400 text-right">
+                {formatCurrency(hoverData.item.sat)}
+              </span>
+            </div>
+
+            <div className="border-t border-white/5 pt-1.5 mt-1 flex justify-between items-center text-[10px]">
+              <span className="text-slate-500">Excedente:</span>
+              <span className="font-semibold text-emerald-400">
+                +{formatCurrency(hoverData.item.real - hoverData.item.sat)}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Métricas del Eje Inferior */}
+      <div className="grid grid-cols-2 gap-4 border-t border-white/10 pt-4 mt-2">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20">
+            <DollarSign size={16} />
+          </div>
+          <div>
+            <div className="text-[10px] text-slate-400 font-light">Acumulado Real</div>
+            <div className="text-sm font-black text-white">
+              {formatCurrency(mockCashFlow.reduce((acc, curr) => acc + curr.real, 0))}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
+            <Award size={16} />
+          </div>
+          <div>
+            <div className="text-[10px] text-slate-400 font-light">Acumulado SAT</div>
+            <div className="text-sm font-black text-emerald-400">
+              {formatCurrency(mockCashFlow.reduce((acc, curr) => acc + curr.sat, 0))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
