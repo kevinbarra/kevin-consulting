@@ -99,6 +99,7 @@ export async function POST(req: NextRequest) {
       cfdi_use,
       fiscal_tracked,
       cutoff_day,
+      subtotal,
     } = body;
 
     // Validation
@@ -117,6 +118,11 @@ export async function POST(req: NextRequest) {
     const numericCutoffDay = Number(cutoff_day);
     if (isNaN(numericCutoffDay) || numericCutoffDay < 1 || numericCutoffDay > 31) {
       return NextResponse.json({ error: 'Cutoff day must be between 1 and 31' }, { status: 400 });
+    }
+
+    const numericSubtotal = parseFloat(subtotal || 0);
+    if (isNaN(numericSubtotal) || numericSubtotal < 0) {
+      return NextResponse.json({ error: 'Subtotal must be a non-negative number' }, { status: 400 });
     }
 
     // Execute user creation and client profile association in a transaction with admin authority
@@ -140,8 +146,8 @@ export async function POST(req: NextRequest) {
       // Create client profile
       const clientRes = await dbClient.query(
         `INSERT INTO clients (
-          user_id, business_name, legal_name, rfc, postal_code, tax_regime, cfdi_use, fiscal_tracked, cutoff_day
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+          user_id, business_name, legal_name, rfc, postal_code, tax_regime, cfdi_use, fiscal_tracked, cutoff_day, subtotal
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
         [
           newUserId,
           business_name,
@@ -149,9 +155,10 @@ export async function POST(req: NextRequest) {
           cleanedRFC,
           postal_code || '',
           tax_regime || '',
-          cfdi_use || '',
+          cfdi_use || (cleanedRFC.length === 12 ? 'G03' : 'D01'),
           fiscal_tracked !== undefined ? fiscal_tracked : true,
           numericCutoffDay,
+          numericSubtotal,
         ]
       );
 

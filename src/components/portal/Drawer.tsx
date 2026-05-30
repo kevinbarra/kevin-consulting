@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Copy, Check, FileText, AlertCircle, Calculator, Building, User, Upload, Download, RefreshCw, KeyRound, ShieldAlert } from 'lucide-react';
+import { X, Copy, Check, FileText, AlertCircle, Calculator, Building, User, Upload, Download, RefreshCw, KeyRound, ShieldAlert, DollarSign } from 'lucide-react';
 import { Client, calculateMexicanTaxes } from './mockData';
 import { uploadDocumentAction, getClientDocumentsAction } from '@/app/portal/actions/documentActions';
 import { usePortalSim } from '@/app/portal/PortalClientLayout';
@@ -15,10 +15,90 @@ interface DrawerProps {
 }
 
 export default function Drawer({ isOpen, onClose, client }: DrawerProps) {
-  const { role } = usePortalSim();
+  const { role, refreshData } = usePortalSim();
 
   // Estado para controlar qué campos han sido copiados (para el feedback visual)
   const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  // Estados para la emisión de cargos manuales
+  const [isBillingFormOpen, setIsBillingFormOpen] = useState(false);
+  const [billConcept, setBillConcept] = useState('');
+  const [billAmount, setBillAmount] = useState('0');
+  const [billStatus, setBillStatus] = useState('pendiente');
+  const [billDueDate, setBillDueDate] = useState('');
+  const [billSatUuid, setBillSatUuid] = useState('');
+  const [billPaymentForm, setBillPaymentForm] = useState('03 - Transferencia electrónica de fondos');
+  const [billBankDestination, setBillBankDestination] = useState('BBVA México');
+  const [billPaidAt, setBillPaidAt] = useState('');
+  const [isCreatingBilling, setIsCreatingBilling] = useState(false);
+  const [billError, setBillError] = useState<string | null>(null);
+  const [billingSuccess, setBillingSuccess] = useState(false);
+
+  const getFutureDateStr = (daysAhead: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() + daysAhead);
+    return d.toISOString().substring(0, 10);
+  };
+
+  const handleCreateBilling = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!client) return;
+    setBillError(null);
+    setBillingSuccess(false);
+
+    const amountNum = parseFloat(billAmount);
+    if (isNaN(amountNum) || amountNum <= 0) {
+      setBillError('El monto subtotal debe ser un número mayor a cero.');
+      return;
+    }
+
+    if (!billConcept.trim() || !billDueDate) {
+      setBillError('El concepto y la fecha de vencimiento son requeridos.');
+      return;
+    }
+
+    setIsCreatingBilling(true);
+
+    try {
+      const res = await fetch('/api/billings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_id: client.id,
+          concept: billConcept.trim(),
+          amount: amountNum,
+          status: billStatus,
+          due_date: billDueDate,
+          sat_uuid: client.isFiscal ? (billSatUuid.trim() || null) : null,
+          payment_form: billPaymentForm.trim() || null,
+          bank_destination: billBankDestination.trim() || null,
+          paid_at: billStatus === 'pagado' ? (billPaidAt || new Date().toISOString().substring(0, 10)) : null
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Ocurrió un error al registrar el cargo.');
+      }
+
+      setBillingSuccess(true);
+      setBillConcept('');
+      setBillAmount('0');
+      setBillSatUuid('');
+      
+      await refreshData();
+      setTimeout(() => {
+        setIsBillingFormOpen(false);
+        setBillingSuccess(false);
+      }, 1500);
+
+    } catch (err: any) {
+      setBillError(err.message || 'Error al conectar con el servidor.');
+    } finally {
+      setIsCreatingBilling(false);
+    }
+  };
 
   // Estados para la gestión documental real de Neon DB
   const [realDocuments, setRealDocuments] = useState<any[]>([]);
@@ -408,53 +488,239 @@ export default function Drawer({ isOpen, onClose, client }: DrawerProps) {
                       <RefreshCw className="animate-spin text-blue-500" size={14} />
                       Cargando expediente contable...
                     </div>
-                  ) : realDocuments.length === 0 && client.contracts.length === 0 ? (
+                  ) : realDocuments.length === 0 ? (
                     <div className="text-center text-xs text-slate-500 italic py-4 border border-dashed border-white/5 rounded-2xl">
-                      No hay archivos registrados.
+                      No hay archivos registrados en Neon DB.
                     </div>
                   ) : (
-                    <>
-                      {/* Documentos reales de Neon DB */}
-                      {realDocuments.map((doc) => (
-                        <a
-                          key={`real-${doc.id}`}
-                          href={doc.file_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex justify-between items-center p-3 border border-blue-500/10 hover:border-blue-500/30 rounded-xl bg-blue-500/5 hover:bg-blue-500/10 transition-all group cursor-pointer"
-                        >
-                          <div className="space-y-0.5 flex-1 min-w-0 pr-4">
-                            <div className="text-xs font-semibold text-slate-200 group-hover:text-blue-400 transition-colors truncate">
-                              {doc.file_name}
-                            </div>
-                            <div className="text-[10px] text-slate-400 font-light">
-                              {doc.document_type} • Cargado el {new Date(doc.uploaded_at).toLocaleDateString('es-MX')}
-                            </div>
+                    realDocuments.map((doc) => (
+                      <a
+                        key={`real-${doc.id}`}
+                        href={doc.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex justify-between items-center p-3 border border-blue-500/10 hover:border-blue-500/30 rounded-xl bg-blue-500/5 hover:bg-blue-500/10 transition-all group cursor-pointer"
+                      >
+                        <div className="space-y-0.5 flex-1 min-w-0 pr-4">
+                          <div className="text-xs font-semibold text-slate-200 group-hover:text-blue-400 transition-colors truncate">
+                            {doc.file_name}
                           </div>
-                          <Download size={14} className="text-slate-400 group-hover:text-blue-400 transition-colors shrink-0" />
-                        </a>
-                      ))}
-
-                      {/* Fallback de simulación frontend */}
-                      {client.contracts.map((c, i) => (
-                        <div key={`mock-${i}`} className="flex justify-between items-center p-3 border border-white/5 rounded-xl bg-white/[0.01]">
-                          <div className="space-y-0.5">
-                            <div className="text-xs font-semibold text-white truncate max-w-[250px]" title={c.name}>
-                              {c.name}
-                            </div>
-                            <div className="text-[10px] text-slate-400 font-light">
-                              {c.size} • Simulado
-                            </div>
+                          <div className="text-[10px] text-slate-400 font-light">
+                            {doc.document_type} • Cargado el {new Date(doc.uploaded_at).toLocaleDateString('es-MX')}
                           </div>
-                          <span className="px-2 py-0.5 rounded text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold">
-                            Mock PDF
-                          </span>
                         </div>
-                      ))}
-                    </>
+                        <Download size={14} className="text-slate-400 group-hover:text-blue-400 transition-colors shrink-0" />
+                      </a>
+                    ))
                   )}
                 </div>
               </div>
+
+              {/* SECCIÓN DE EMISIÓN DE CARGOS (SOLO ADMIN) */}
+              {role === 'admin' && (
+                <div className="space-y-3 pt-2 border-t border-white/10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-slate-300 font-bold text-sm">
+                      <Calculator size={16} className="text-blue-400" />
+                      <span>Emisión de Cargos y Cobranza</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsBillingFormOpen(!isBillingFormOpen);
+                        setBillAmount(client.subtotal.toString());
+                        setBillConcept(`Mensualidad de Consultoría - ${new Date().toLocaleString('es-MX', { month: 'long', year: 'numeric' })}`);
+                        setBillDueDate(getFutureDateStr(10));
+                        setBillStatus('pendiente');
+                        setBillSatUuid('');
+                        setBillError(null);
+                        setBillingSuccess(false);
+                      }}
+                      className="py-1.5 px-3 bg-blue-600/10 hover:bg-blue-600/25 border border-blue-500/20 text-blue-400 hover:text-blue-300 rounded-xl text-[10px] font-bold transition-all cursor-pointer active:scale-95"
+                    >
+                      {isBillingFormOpen ? 'Ocultar Formulario' : 'Emitir Factura/Cargo'}
+                    </button>
+                  </div>
+
+                  {isBillingFormOpen && (
+                    <form onSubmit={handleCreateBilling} className="p-4 border border-white/5 bg-slate-900/30 rounded-2xl space-y-4 animate-in slide-in-from-top-2">
+                      <div className="space-y-1">
+                        <label className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block font-sans">Concepto *</label>
+                        <input
+                          type="text"
+                          required
+                          value={billConcept}
+                          onChange={(e) => setBillConcept(e.target.value)}
+                          placeholder="Mensualidad de TI"
+                          className="w-full px-3 py-2 bg-slate-950/60 border border-white/10 focus:border-blue-500 rounded-xl text-xs text-white focus:outline-none transition-colors"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block">Monto Subtotal ($ MXN) *</label>
+                          <input
+                            type="number"
+                            required
+                            min={0.01}
+                            step="any"
+                            value={billAmount}
+                            onChange={(e) => setBillAmount(e.target.value)}
+                            className="w-full px-3 py-2 bg-slate-950/60 border border-white/10 focus:border-blue-500 rounded-xl text-xs text-white focus:outline-none transition-colors font-mono"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block">Fecha Vencimiento *</label>
+                          <input
+                            type="date"
+                            required
+                            value={billDueDate}
+                            onChange={(e) => setBillDueDate(e.target.value)}
+                            className="w-full px-3 py-2 bg-slate-950/60 border border-white/10 focus:border-blue-500 rounded-xl text-xs text-white focus:outline-none transition-colors font-mono text-center"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Autocalculated Taxes Preview */}
+                      {parseFloat(billAmount) > 0 && (
+                        <div className="p-3 border border-blue-500/10 bg-blue-500/[0.02] rounded-xl text-[10px] space-y-1.5 text-slate-400">
+                          <div className="font-bold text-white mb-1 uppercase tracking-wider text-[8px] flex items-center justify-between">
+                            <span>Autocálculo Fiscal en tiempo real</span>
+                            <span className="text-blue-400">SAT IVA 16%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Subtotal:</span>
+                            <span className="font-bold text-white font-mono">{formatCurrency(parseFloat(billAmount))}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>IVA (16%):</span>
+                            <span className="font-bold text-white font-mono">{formatCurrency(parseFloat(billAmount) * 0.16)}</span>
+                          </div>
+                          {client.isFiscal && client.isPersonaMoral && (
+                            <>
+                              <div className="flex justify-between text-rose-400">
+                                <span>Retención ISR (1.25%):</span>
+                                <span className="font-bold font-mono">-{formatCurrency(parseFloat(billAmount) * 0.0125)}</span>
+                              </div>
+                              <div className="flex justify-between text-rose-400">
+                                <span>Retención IVA (10.66%):</span>
+                                <span className="font-bold font-mono">-{formatCurrency(parseFloat(billAmount) * 0.1066)}</span>
+                              </div>
+                            </>
+                          )}
+                          <div className="flex justify-between border-t border-white/5 pt-1.5 text-xs text-emerald-400 font-bold">
+                            <span>Importe Neto Estimado:</span>
+                            <span className="font-black font-mono">
+                              {formatCurrency(
+                                parseFloat(billAmount) + 
+                                parseFloat(billAmount) * 0.16 - 
+                                (client.isFiscal && client.isPersonaMoral ? (parseFloat(billAmount) * 0.0125 + parseFloat(billAmount) * 0.1066) : 0)
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block">Estatus de Cobro</label>
+                          <select
+                            value={billStatus}
+                            onChange={(e) => setBillStatus(e.target.value)}
+                            className="w-full px-2 py-2 bg-slate-950 border border-white/10 focus:border-blue-500 rounded-xl text-xs text-white focus:outline-none transition-colors"
+                          >
+                            <option value="pendiente">Pendiente</option>
+                            <option value="pagado">Pagado</option>
+                            <option value="atrasado">Atrasado</option>
+                          </select>
+                        </div>
+
+                        {billStatus === 'pagado' && (
+                          <div className="space-y-1">
+                            <label className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block">Fecha de Pago</label>
+                            <input
+                              type="date"
+                              required
+                              value={billPaidAt}
+                              onChange={(e) => setBillPaidAt(e.target.value)}
+                              className="w-full px-3 py-2 bg-slate-950/60 border border-white/10 focus:border-blue-500 rounded-xl text-xs text-white focus:outline-none transition-colors font-mono text-center"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Optional details */}
+                      {client.isFiscal && (
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block">Folio Fiscal SAT (sat_uuid) - Opcional</label>
+                          <input
+                            type="text"
+                            value={billSatUuid}
+                            onChange={(e) => setBillSatUuid(e.target.value)}
+                            placeholder="00000000-0000-0000-0000-000000000000"
+                            className="w-full px-3 py-2 bg-slate-950/60 border border-white/10 focus:border-blue-500 rounded-xl text-xs text-white focus:outline-none transition-colors tracking-wide font-mono"
+                          />
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block">Banco Destino - Opcional</label>
+                          <input
+                            type="text"
+                            value={billBankDestination}
+                            onChange={(e) => setBillBankDestination(e.target.value)}
+                            placeholder="BBVA México"
+                            className="w-full px-3 py-2 bg-slate-950/60 border border-white/10 focus:border-blue-500 rounded-xl text-xs text-white focus:outline-none transition-colors font-sans"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block">Forma de Pago - Opcional</label>
+                          <input
+                            type="text"
+                            value={billPaymentForm}
+                            onChange={(e) => setBillPaymentForm(e.target.value)}
+                            placeholder="03 - Transferencia"
+                            className="w-full px-3 py-2 bg-slate-950/60 border border-white/10 focus:border-blue-500 rounded-xl text-xs text-white focus:outline-none transition-colors font-sans"
+                          />
+                        </div>
+                      </div>
+
+                      {billError && (
+                        <div className="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[10px] rounded-xl flex gap-1.5">
+                          <AlertCircle size={14} className="shrink-0 mt-0.5" />
+                          <p>{billError}</p>
+                        </div>
+                      )}
+
+                      {billingSuccess && (
+                        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] rounded-xl text-center font-bold">
+                          ¡Cargo registrado con éxito en Neon DB!
+                        </div>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={isCreatingBilling || billingSuccess}
+                        className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 border border-blue-500/20 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-lg shadow-blue-500/10 disabled:opacity-50"
+                      >
+                        {isCreatingBilling ? (
+                          <>
+                            <RefreshCw className="animate-spin" size={14} />
+                            Creando registro...
+                          </>
+                        ) : (
+                          <>
+                            <DollarSign size={14} />
+                            Guardar y Registrar Cargo
+                          </>
+                        )}
+                      </button>
+                    </form>
+                  )}
+                </div>
+              )}
 
               {/* SECCIÓN DE SOPORTE Y CREDENCIALES (SOLO ADMIN) */}
               {role === 'admin' && (

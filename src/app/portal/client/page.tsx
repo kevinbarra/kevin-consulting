@@ -50,6 +50,17 @@ export default function ClientPage() {
   // Drag and drop feedback
   const [isDragOver, setIsDragOver] = useState(false);
 
+  // Estados para copiar coordenadas de pago
+  const [copiedPaymentField, setCopiedPaymentField] = useState<string | null>(null);
+
+  const copyPaymentField = (text: string, fieldId: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedPaymentField(fieldId);
+    setTimeout(() => {
+      setCopiedPaymentField(null);
+    }, 2000);
+  };
+
   // Cargar documentos reales desde Neon DB
   useEffect(() => {
     async function loadClientDocs() {
@@ -385,6 +396,63 @@ export default function ClientPage() {
 
         {/* Columna Derecha: Formulario Fiscal Real */}
         <div className="space-y-6">
+          {/* Tarjeta Bento de Coordenadas de Pago */}
+          <section className="border border-blue-500/10 hover:border-blue-500/30 bg-[#1e293b]/30 backdrop-blur-md rounded-3xl p-6 space-y-4 shadow-lg transition-all">
+            <div className="flex items-center gap-2 text-slate-300 font-bold text-sm">
+              <CreditCard size={18} className="text-blue-400" />
+              <span>Instrucciones de Pago BBVA</span>
+            </div>
+            
+            <p className="text-slate-400 text-xs font-light leading-relaxed">
+              Realiza tu transferencia electrónica directamente a nuestra cuenta corporativa. El RFC del cliente es tu referencia de conciliación obligatoria.
+            </p>
+
+            <div className="space-y-3 pt-2 text-xs">
+              <div className="border border-white/5 bg-slate-950/40 p-3.5 rounded-2xl space-y-2.5">
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] uppercase text-slate-400 font-medium">Banco Receptor</span>
+                  <span className="font-bold text-white text-right">BBVA México</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] uppercase text-slate-400 font-medium">Beneficiario</span>
+                  <span className="font-bold text-white text-right text-[11px] truncate max-w-[150px]" title="Kevin Barra Consulting S.A.S.">
+                    Kevin Barra Consulting S.A.S.
+                  </span>
+                </div>
+
+                <div className="border-t border-white/5 pt-2.5 space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] uppercase text-slate-400 font-medium">CLABE Interbancaria</span>
+                    <button
+                      onClick={() => copyPaymentField('012180012345678901', 'clabe')}
+                      className="text-blue-400 hover:text-blue-300 flex items-center gap-1 active:scale-95 transition-all text-[10px] font-bold cursor-pointer"
+                    >
+                      {copiedPaymentField === 'clabe' ? '¡Copiado!' : 'Copiar'}
+                    </button>
+                  </div>
+                  <p className="font-mono font-bold text-white tracking-widest text-xs bg-slate-950 p-2 rounded-xl text-center border border-white/5">
+                    012180012345678901
+                  </p>
+                </div>
+
+                <div className="border-t border-white/5 pt-2.5 space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] uppercase text-slate-400 font-medium">Concepto Sugerido</span>
+                    <button
+                      onClick={() => copyPaymentField(simulatedClient.rfc, 'concept')}
+                      className="text-blue-400 hover:text-blue-300 flex items-center gap-1 active:scale-95 transition-all text-[10px] font-bold cursor-pointer"
+                    >
+                      {copiedPaymentField === 'concept' ? '¡Copiado!' : 'Copiar'}
+                    </button>
+                  </div>
+                  <p className="font-mono font-bold text-emerald-400 tracking-wider text-xs bg-slate-950 p-2 rounded-xl text-center border border-white/5 uppercase">
+                    {simulatedClient.rfc}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
           <section className="border border-white/10 bg-[#1e293b]/20 backdrop-blur-md rounded-3xl p-6 h-fit space-y-5 shadow-lg">
             <div>
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
