@@ -27,10 +27,28 @@ export async function GET() {
     const clients = await queryWithRLS(userId, role, async (dbClient) => {
       // Defense in Depth: filter explicitly in application layer
       if (role === 'admin') {
-        const res = await dbClient.query('SELECT * FROM clients ORDER BY created_at DESC');
+        const res = await dbClient.query(`
+          SELECT c.*, COALESCE(d.doc_count, 0)::int as documents_count
+          FROM clients c
+          LEFT JOIN (
+            SELECT client_id, COUNT(*) as doc_count 
+            FROM documents 
+            GROUP BY client_id
+          ) d ON c.id = d.client_id
+          ORDER BY c.created_at DESC
+        `);
         return res.rows;
       } else {
-        const res = await dbClient.query('SELECT * FROM clients WHERE user_id = $1', [userId]);
+        const res = await dbClient.query(`
+          SELECT c.*, COALESCE(d.doc_count, 0)::int as documents_count
+          FROM clients c
+          LEFT JOIN (
+            SELECT client_id, COUNT(*) as doc_count 
+            FROM documents 
+            GROUP BY client_id
+          ) d ON c.id = d.client_id
+          WHERE c.user_id = $1
+        `, [userId]);
         return res.rows;
       }
     });

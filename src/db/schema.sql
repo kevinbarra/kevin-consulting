@@ -49,8 +49,10 @@ CREATE TABLE IF NOT EXISTS clients (
     cfdi_use VARCHAR(10) NOT NULL,
     fiscal_tracked BOOLEAN DEFAULT TRUE NOT NULL,
     cutoff_day INTEGER NOT NULL CHECK (cutoff_day BETWEEN 1 AND 31),
+    subtotal NUMERIC(12, 2) DEFAULT 0.00 NOT NULL CHECK (subtotal >= 0.00), -- Monto mensual pactado
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+
 
 -- Tabla: billings
 -- Almacena los registros de facturación y cobranza (conciliación fiscal)
@@ -188,3 +190,14 @@ CREATE POLICY documents_policy ON documents
             WHERE user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
         )
     );
+
+-- Tabla: system_logs
+-- Registra eventos de automatización del sistema (como la ejecución del cron job)
+CREATE TABLE IF NOT EXISTS system_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    event_type VARCHAR(100) NOT NULL,
+    message TEXT NOT NULL,
+    details JSONB,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+

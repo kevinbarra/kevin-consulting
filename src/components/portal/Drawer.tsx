@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Copy, Check, FileText, AlertCircle, Calculator, Building, User, Upload, Download, RefreshCw } from 'lucide-react';
+import { X, Copy, Check, FileText, AlertCircle, Calculator, Building, User, Upload, Download, RefreshCw, KeyRound, ShieldAlert } from 'lucide-react';
 import { Client, calculateMexicanTaxes } from './mockData';
 import { uploadDocumentAction, getClientDocumentsAction } from '@/app/portal/actions/documentActions';
+import { usePortalSim } from '@/app/portal/PortalClientLayout';
+import { resetClientPasswordAction } from '@/app/portal/actions/adminActions';
 
 interface DrawerProps {
   isOpen: boolean;
@@ -13,6 +15,8 @@ interface DrawerProps {
 }
 
 export default function Drawer({ isOpen, onClose, client }: DrawerProps) {
+  const { role } = usePortalSim();
+
   // Estado para controlar qué campos han sido copiados (para el feedback visual)
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
@@ -23,6 +27,13 @@ export default function Drawer({ isOpen, onClose, client }: DrawerProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Estados para el flujo de soporte (Efecto David)
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [tempPasswordGenerated, setTempPasswordGenerated] = useState<string | null>(null);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [passwordResetError, setPasswordResetError] = useState<string | null>(null);
+  const [passwordResetSuccess, setPasswordResetSuccess] = useState(false);
 
   // Cargar documentos desde Neon DB al abrir el Drawer o cambiar de cliente
   useEffect(() => {
@@ -445,6 +456,53 @@ export default function Drawer({ isOpen, onClose, client }: DrawerProps) {
                 </div>
               </div>
 
+              {/* SECCIÓN DE SOPORTE Y CREDENCIALES (SOLO ADMIN) */}
+              {role === 'admin' && (
+                <div className="space-y-4 pt-4 border-t border-white/10">
+                  <div className="flex items-center gap-2 text-slate-300 font-bold text-sm">
+                    <KeyRound size={16} className="text-amber-400" />
+                    <span>Mesa de Ayuda y Soporte</span>
+                  </div>
+
+                  <div className="p-4 border border-amber-500/20 rounded-2xl bg-amber-500/5 space-y-3">
+                    <p className="text-slate-300 text-xs font-light leading-relaxed">
+                      Genera una clave de acceso temporal para el cliente si ha perdido el acceso a su cuenta ("Efecto David").
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTempPasswordGenerated(null);
+                        setPasswordResetSuccess(false);
+                        setPasswordResetError(null);
+                        setIsResetModalOpen(true);
+                      }}
+                      className="py-2 px-3.5 bg-amber-600 hover:bg-amber-500 border border-amber-400/30 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-lg shadow-amber-500/10"
+                    >
+                      <KeyRound size={14} />
+                      Restablecer Contraseña Temporal
+                    </button>
+
+                    {passwordResetSuccess && tempPasswordGenerated && (
+                      <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl space-y-2 animate-in slide-in-from-top-2">
+                        <p className="text-[10px] font-bold">¡Nueva contraseña temporal registrada en Neon!</p>
+                        <div className="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-white/5 font-mono text-xs select-all text-white">
+                          <span>{tempPasswordGenerated}</span>
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(tempPasswordGenerated, 'tempPassword')}
+                            className="p-1 hover:bg-white/5 rounded text-slate-400 hover:text-white"
+                          >
+                            <Copy size={13} />
+                          </button>
+                        </div>
+                        <p className="text-[9px] text-slate-400 font-light">Comparta esta clave temporal con el cliente de forma segura.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Formulario de Carga de Documentos */}
               <div className="space-y-3 border-t border-white/10 pt-6">
                 <div className="flex items-center gap-2 text-slate-300 font-bold text-sm">
@@ -525,6 +583,72 @@ export default function Drawer({ isOpen, onClose, client }: DrawerProps) {
               </div>
             </div>
           </motion.div>
+
+          {/* Modal de Confirmación para Restablecer Contraseña */}
+          {isResetModalOpen && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+              <div 
+                className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+                onClick={() => setIsResetModalOpen(false)}
+              />
+              <div className="relative w-full max-w-sm bg-[#090d16]/95 border border-white/10 rounded-3xl p-6 text-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 z-10">
+                <div className="flex gap-3 mb-5 text-amber-400">
+                  <ShieldAlert size={24} className="shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-bold text-white">¿Restablecer Contraseña?</h3>
+                    <p className="text-slate-400 text-xs font-light leading-relaxed">
+                      Se generará una contraseña temporal aleatoria para este cliente. Esto reemplazará su contraseña actual de forma inmediata en la base de datos Neon.
+                    </p>
+                  </div>
+                </div>
+
+                {passwordResetError && (
+                  <div className="p-2.5 mb-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[10px] rounded-lg">
+                    {passwordResetError}
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setIsResetModalOpen(false)}
+                    className="flex-1 py-2 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-semibold text-slate-300 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (!client.user_id) {
+                        setPasswordResetError('Error: No se encontró el identificador del usuario.');
+                        return;
+                      }
+                      setIsResettingPassword(true);
+                      setPasswordResetError(null);
+                      
+                      const newPass = `KC-TEMP-${Math.floor(100000 + Math.random() * 900000)}`;
+                      try {
+                        const res = await resetClientPasswordAction(client.user_id, newPass);
+                        if (res.success) {
+                          setTempPasswordGenerated(newPass);
+                          setPasswordResetSuccess(true);
+                          setIsResetModalOpen(false);
+                        } else {
+                          setPasswordResetError(res.message);
+                        }
+                      } catch (err: any) {
+                        setPasswordResetError(err.message || 'Error de red.');
+                      } finally {
+                        setIsResettingPassword(false);
+                      }
+                    }}
+                    disabled={isResettingPassword}
+                    className="flex-1 py-2 px-3 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all disabled:opacity-50"
+                  >
+                    {isResettingPassword ? 'Procesando...' : 'Generar'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
     </AnimatePresence>

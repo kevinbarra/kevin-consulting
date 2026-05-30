@@ -1,7 +1,8 @@
 'use server';
 
 import { put } from '@vercel/blob';
-import pool from '@/lib/db';
+import pool, { queryWithRLS } from '@/lib/db';
+import { auth } from '@/auth';
 
 export interface UploadResult {
   success: boolean;
@@ -18,7 +19,7 @@ export interface UploadResult {
 
 /**
  * Server Action para subir un archivo adjunto (Contratos, Addendums, CSF)
- * y registrar automáticamente su URL en la base de datos Neon.
+ * y registrar automáticamente su URL en la base de datos Neon bajo RLS.
  */
 export async function uploadDocumentAction(formData: FormData): Promise<UploadResult> {
   const clientId = formData.get('clientId') as string;
@@ -41,6 +42,14 @@ export async function uploadDocumentAction(formData: FormData): Promise<UploadRe
     return { success: false, message: `Tipo de documento inválido: ${documentType}. Debe ser Contrato, Addendum o CSF.` };
   }
 
+  // Obtener sesión de usuario para inyectar variables de RLS
+  const session = await auth();
+  if (!session?.user) {
+    return { success: false, message: 'No autorizado: Sesión ausente o expirada.' };
+  }
+
+  const { id: userId, role } = session.user;
+
   let fileUrl = '';
   try {
     // 1. Intentar subir a Vercel Blob
@@ -61,18 +70,27 @@ export async function uploadDocumentAction(formData: FormData): Promise<UploadRe
       fileUrl = `https://mock-storage.vercel-storage.com/documents/${clientId}/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
     }
 
-    // 2. Registrar en la base de datos de Neon
-    const insertQuery = `
-      INSERT INTO documents (client_id, file_name, file_url, document_type)
-      VALUES ($1, $2, $3, $4)
-      RETURNING id, client_id, file_name, file_url, document_type, uploaded_at;
-    `;
-    const insertValues = [clientId, file.name, fileUrl, documentType];
+    // 2. Registrar en la base de datos de Neon usando queryWithRLS
+    const savedDoc = await queryWithRLS(userId, role, async (dbClient) => {
+      // Si el rol es cliente, validar que sólo intente subir documentos a su propio perfil comercial
+      if (role === 'client') {
+        const clientCheck = await dbClient.query('SELECT id FROM clients WHERE id = $1 AND user_id = $2', [clientId, userId]);
+        if (clientCheck.rows.length === 0) {
+          throw new Error('ACCESS_DENIED_TO_CLIENT');
+        }
+      }
 
-    const dbResult = await pool.query(insertQuery, insertValues);
-    const savedDoc = dbResult.rows[0];
+      const insertQuery = `
+        INSERT INTO documents (client_id, file_name, file_url, document_type)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, client_id, file_name, file_url, document_type, uploaded_at;
+      `;
+      const insertValues = [clientId, file.name, fileUrl, documentType];
+      const res = await dbClient.query(insertQuery, insertValues);
+      return res.rows[0];
+    });
 
-    console.log(`[DATABASE] Documento registrado exitosamente en Neon. ID: ${savedDoc.id}`);
+    console.log(`[DATABASE] Documento registrado exitosamente en Neon bajo RLS. ID: ${savedDoc.id}`);
     return {
       success: true,
       message: 'El documento ha sido cargado y registrado con éxito.',
@@ -88,6 +106,9 @@ export async function uploadDocumentAction(formData: FormData): Promise<UploadRe
 
   } catch (error: any) {
     console.error('[UPLOAD ERROR] Falló la operación de carga de archivo:', error);
+    if (error.message === 'ACCESS_DENIED_TO_CLIENT') {
+      return { success: false, message: 'Operación denegada: No tienes permisos para subir archivos a este perfil de cliente.' };
+    }
     return {
       success: false,
       message: `Error al procesar el archivo: ${error.message || 'Error desconocido'}`
@@ -96,47 +117,86 @@ export async function uploadDocumentAction(formData: FormData): Promise<UploadRe
 }
 
 /**
- * Obtiene los documentos asociados a un cliente desde Neon DB.
+ * Obtiene los documentos asociados a un cliente desde Neon DB, protegiendo la consulta con RLS.
  */
 export async function getClientDocumentsAction(clientId: string) {
   if (!clientId) {
     throw new Error('Falta el identificador del cliente.');
   }
 
-  try {
-    const res = await pool.query(`
-      SELECT id, file_name, file_url, document_type, uploaded_at
-      FROM documents
-      WHERE client_id = $1
-      ORDER BY uploaded_at DESC;
-    `, [clientId]);
+  // Obtener sesión de usuario para inyectar variables de RLS
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error('No autorizado: Inicie sesión para ver los expedientes.');
+  }
 
-    return res.rows.map(doc => ({
+  const { id: userId, role } = session.user;
+
+  try {
+    const documents = await queryWithRLS(userId, role, async (dbClient) => {
+      // Si el rol es cliente, validar pertenencia (RLS lo haría de todos modos)
+      if (role === 'client') {
+        const clientCheck = await dbClient.query('SELECT id FROM clients WHERE id = $1 AND user_id = $2', [clientId, userId]);
+        if (clientCheck.rows.length === 0) {
+          throw new Error('ACCESS_DENIED');
+        }
+      }
+
+      const res = await dbClient.query(`
+        SELECT id, file_name, file_url, document_type, uploaded_at
+        FROM documents
+        WHERE client_id = $1
+        ORDER BY uploaded_at DESC;
+      `, [clientId]);
+      return res.rows;
+    });
+
+    return documents.map(doc => ({
       id: doc.id,
       file_name: doc.file_name,
       file_url: doc.file_url,
       document_type: doc.document_type,
       uploaded_at: doc.uploaded_at.toISOString(),
     }));
-  } catch (error) {
+  } catch (error: any) {
     console.error('[DB ERROR] Error al consultar documentos del cliente:', error);
+    if (error.message === 'ACCESS_DENIED') {
+      throw new Error('No tienes permisos para ver este expediente de documentos.');
+    }
     throw new Error('No se pudo obtener el historial de documentos.');
   }
 }
 
 /**
  * Obtiene los registros de auditoría de automatización (system_logs) desde Neon DB.
+ * Restringido estrictamente a administradores mediante la validación de la sesión.
  */
 export async function getSystemLogsAction() {
-  try {
-    const res = await pool.query(`
-      SELECT id, event_type, message, details, created_at
-      FROM system_logs
-      ORDER BY created_at DESC
-      LIMIT 10;
-    `);
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error('No autorizado: Inicie sesión para ver la bitácora.');
+  }
 
-    return res.rows.map(log => ({
+  // Restricción explícita de seguridad de capa de aplicación
+  if (session.user.role !== 'admin') {
+    throw new Error('Acceso prohibido: Se requieren permisos de Administrador.');
+  }
+
+  const { id: userId, role } = session.user;
+
+  try {
+    // Al ser logs administrativos, los recuperamos bajo contexto de admin
+    const logs = await queryWithRLS(userId, role, async (dbClient) => {
+      const res = await dbClient.query(`
+        SELECT id, event_type, message, details, created_at
+        FROM system_logs
+        ORDER BY created_at DESC
+        LIMIT 10;
+      `);
+      return res.rows;
+    });
+
+    return logs.map(log => ({
       id: log.id,
       event_type: log.event_type,
       message: log.message,

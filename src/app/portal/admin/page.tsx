@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usePortalSim } from '../layout';
+import { usePortalSim } from '../PortalClientLayout';
 import AreaChart from '@/components/portal/AreaChart';
 import Drawer from '@/components/portal/Drawer';
 import { BentoSkeleton } from '@/components/portal/Skeleton';
@@ -25,7 +25,7 @@ import { Client } from '@/components/portal/mockData';
 import { getSystemLogsAction } from '@/app/portal/actions/documentActions';
 
 export default function AdminPage() {
-  const { isSimLoading, clientData } = usePortalSim();
+  const { isSimLoading, clientData, realBillings } = usePortalSim();
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -64,11 +64,14 @@ export default function AdminPage() {
     c.rfc.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Totales financieros agregados
-  const totalReal = 1195000; // Suma acumulada de ingresos reales
-  const totalVencido = clientData
-    .filter(c => c.status === 'Mensualidad Vencida')
-    .reduce((acc, curr) => acc + curr.subtotal * 1.16, 0); // Con IVA incluido aprox.
+  // Totales financieros agregados de la base de datos real en Neon
+  const totalReal = realBillings
+    .filter(b => b.status === 'pagado')
+    .reduce((acc, curr) => acc + parseFloat(curr.total || curr.amount || 0), 0);
+
+  const totalVencido = realBillings
+    .filter(b => b.status === 'atrasado')
+    .reduce((acc, curr) => acc + parseFloat(curr.total || curr.amount || 0), 0);
 
   const activeContractsCount = clientData.reduce((acc, curr) => acc + curr.contracts.length, 0);
   const totalClientsCount = clientData.length;

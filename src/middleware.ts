@@ -8,13 +8,13 @@ export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
   const user = req.auth?.user;
-
   const pathname = nextUrl.pathname;
-  const isAdminRoute = pathname.startsWith('/api/admin');
-  const isClientRoute = pathname.startsWith('/api/client');
 
-  // Verify and restrict access for admin paths
-  if (isAdminRoute) {
+  // 1. Protección de Endpoints API
+  const isAdminApiRoute = pathname.startsWith('/api/admin');
+  const isClientApiRoute = pathname.startsWith('/api/client');
+
+  if (isAdminApiRoute) {
     if (!isLoggedIn) {
       return NextResponse.json({ error: 'Unauthorized: Session missing' }, { status: 401 });
     }
@@ -23,8 +23,7 @@ export default auth((req) => {
     }
   }
 
-  // Verify and restrict access for client paths
-  if (isClientRoute) {
+  if (isClientApiRoute) {
     if (!isLoggedIn) {
       return NextResponse.json({ error: 'Unauthorized: Session missing' }, { status: 401 });
     }
@@ -33,10 +32,40 @@ export default auth((req) => {
     }
   }
 
+  // 2. Protección de Vistas del Portal (/portal)
+  const isPortalRoute = pathname.startsWith('/portal');
+
+  if (isPortalRoute) {
+    if (!isLoggedIn) {
+      // Redirigir a login si no ha iniciado sesión
+      const loginUrl = new URL('/login', nextUrl.origin);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    const isPortalAdminPage = pathname.startsWith('/portal/admin');
+    const isPortalClientPage = pathname.startsWith('/portal/client');
+
+    if (isPortalAdminPage && user?.role !== 'admin') {
+      // Si un cliente intenta entrar al panel de admin, redirigir a su vista de cliente
+      const clientUrl = new URL('/portal/client', nextUrl.origin);
+      return NextResponse.redirect(clientUrl);
+    }
+
+    if (isPortalClientPage && user?.role !== 'client') {
+      // Si un administrador intenta entrar al panel de cliente directo, redirigir a su consola admin
+      const adminUrl = new URL('/portal/admin', nextUrl.origin);
+      return NextResponse.redirect(adminUrl);
+    }
+  }
+
   return NextResponse.next();
 });
 
 export const config = {
-  // Apply middleware strictly to target administrative and client-scoped API endpoints
-  matcher: ['/api/admin/:path*', '/api/client/:path*'],
+  // Aplicar el middleware a endpoints API y vistas del portal
+  matcher: [
+    '/api/admin/:path*',
+    '/api/client/:path*',
+    '/portal/:path*'
+  ],
 };

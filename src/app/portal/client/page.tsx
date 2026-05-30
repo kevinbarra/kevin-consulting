@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { usePortalSim } from '../layout';
+import { usePortalSim } from '../PortalClientLayout';
 import { ClientSkeleton } from '@/components/portal/Skeleton';
 import { 
   FileText, 
@@ -10,9 +10,7 @@ import {
   Building2, 
   FileCode, 
   ShieldCheck, 
-  ExternalLink,
   Save,
-  CheckCircle,
   AlertCircle,
   Upload,
   RefreshCw
@@ -20,11 +18,10 @@ import {
 import { uploadDocumentAction, getClientDocumentsAction } from '@/app/portal/actions/documentActions';
 
 export default function ClientPage() {
-  const { clientProfile, isSimLoading, clientData, updateClientInfo } = usePortalSim();
+  const { clientProfile, isSimLoading, clientData, updateClientInfo, realBillings, refreshData } = usePortalSim();
 
-  // Obtener el cliente simulado actual según el perfil activo
-  // Usamos Acme de México (c1) para simulador fiscal y Juan Pérez (c3) para simulador regular
-  const simulatedClient = clientData.find(c => c.id === (clientProfile === 'fiscal' ? 'c1' : 'c3')) || clientData[0];
+  // En producción bajo RLS, clientData contendrá únicamente el registro del cliente logueado
+  const simulatedClient = clientData[0];
 
   // Estado del formulario
   const [rfc, setRfc] = useState('');
@@ -32,13 +29,16 @@ export default function ClientPage() {
   const [cp, setCp] = useState('');
   const [regimenFiscal, setRegimenFiscal] = useState('');
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [isSavingForm, setIsSavingForm] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   
   // Estado para simular progreso de descarga
   const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
   const [downloadProgress, setDownloadProgress] = useState(0);
 
-  // Estado para el modal de recibo interno
+  // Estados para el modal de recibo interno
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+  const [selectedReceipt, setSelectedReceipt] = useState<any | null>(null);
 
   // Estados para documentos reales de Neon DB
   const [realDocuments, setRealDocuments] = useState<any[]>([]);
@@ -46,6 +46,9 @@ export default function ClientPage() {
   const [selectedCsfFile, setSelectedCsfFile] = useState<File | null>(null);
   const [isUploadingCsf, setIsUploadingCsf] = useState(false);
   const [csfUploadMessage, setCsfUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Drag and drop feedback
+  const [isDragOver, setIsDragOver] = useState(false);
 
   // Cargar documentos reales desde Neon DB
   useEffect(() => {
@@ -65,6 +68,17 @@ export default function ClientPage() {
       }
     }
     loadClientDocs();
+  }, [simulatedClient]);
+
+  // Sincronizar campos del formulario al cambiar de cliente
+  useEffect(() => {
+    if (simulatedClient) {
+      setRfc(simulatedClient.rfc || '');
+      setRazonSocial(simulatedClient.razonSocial || '');
+      setCp(simulatedClient.cp || '');
+      setRegimenFiscal(simulatedClient.regimenFiscal || '601 - General de Ley Personas Morales');
+      setFormErrors({});
+    }
   }, [simulatedClient]);
 
   const handleCsfUpload = async (e: React.FormEvent) => {
@@ -87,6 +101,8 @@ export default function ClientPage() {
         const fileInput = document.getElementById('client-csf-input') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
         setRealDocuments((prev) => [res.document, ...prev]);
+        // Refrescar layout para actualizar contadores de contratos
+        await refreshData();
       } else {
         setCsfUploadMessage({ type: 'error', text: res.message });
       }
@@ -97,18 +113,7 @@ export default function ClientPage() {
     }
   };
 
-  // Sincronizar campos del formulario al cambiar de cliente simulado
-  useEffect(() => {
-    if (simulatedClient) {
-      setRfc(simulatedClient.rfc);
-      setRazonSocial(simulatedClient.razonSocial);
-      setCp(simulatedClient.cp);
-      setRegimenFiscal(simulatedClient.regimenFiscal);
-      setFormErrors({});
-    }
-  }, [simulatedClient]);
-
-  // Manejar descargas simuladas
+  // Manejar descargas de facturas simuladas o mockeadas
   const handleDownload = (fileName: string) => {
     if (downloadingFile) return;
     setDownloadingFile(fileName);
@@ -120,33 +125,30 @@ export default function ClientPage() {
           clearInterval(interval);
           setTimeout(() => {
             setDownloadingFile(null);
-          }, 1000); // Dar 1 segundo de éxito
+          }, 1000);
           return 100;
         }
-        return prev + 20; // Progreso rápido
+        return prev + 20;
       });
     }, 150);
   };
 
-  // Validaciones del formulario fiscal
-  const handleFormSubmit = (e: React.FormEvent) => {
+  // Validaciones del formulario fiscal y envío a la API real
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errors: Record<string, string> = {};
 
-    // Validar RFC (Patrón general mexicano simplificado: 12 o 13 caracteres alfanuméricos)
-    const rfcRegex = /^[A-Z&Ña-z&ñ]{3,4}\d{6}[A-V1-9a-v1-9][A-Z0-9a-z]\d$/;
-    if (!rfc) {
+    const cleanRfcVal = rfc.replace(/[\s-]/g, '').toUpperCase();
+    if (!cleanRfcVal) {
       errors.rfc = 'El RFC es requerido';
-    } else if (rfc.length < 12 || rfc.length > 13) {
+    } else if (cleanRfcVal.length < 12 || cleanRfcVal.length > 13) {
       errors.rfc = 'El RFC debe tener 12 o 13 caracteres';
     }
 
-    // Validar Razón Social
     if (!razonSocial.trim()) {
       errors.razonSocial = 'La Razón Social es requerida';
     }
 
-    // Validar CP (Exactamente 5 números)
     const cpRegex = /^\d{5}$/;
     if (!cp) {
       errors.cp = 'El Código Postal es requerido';
@@ -160,13 +162,25 @@ export default function ClientPage() {
     }
 
     setFormErrors({});
-    // Guardar cambios en el contexto de simulación global
-    updateClientInfo(simulatedClient.id, {
-      rfc: rfc.toUpperCase(),
-      razonSocial: razonSocial.toUpperCase(),
+    setIsSavingForm(true);
+    setSaveSuccess(false);
+
+    const isPersonaMoral = cleanRfcVal.length === 12;
+
+    const success = await updateClientInfo(simulatedClient.id, {
+      rfc: cleanRfcVal,
+      name: razonSocial.trim().toUpperCase(),
+      razonSocial: razonSocial.trim().toUpperCase(),
       cp,
-      regimenFiscal
+      regimenFiscal,
+      isPersonaMoral
     });
+
+    setIsSavingForm(false);
+    if (success) {
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    }
   };
 
   const formatCurrency = (val: number) => {
@@ -177,7 +191,7 @@ export default function ClientPage() {
   };
 
   // Mostrar esqueleto en carga
-  if (isSimLoading) {
+  if (isSimLoading || !simulatedClient) {
     return <ClientSkeleton />;
   }
 
@@ -225,78 +239,41 @@ export default function ClientPage() {
                   <RefreshCw className="animate-spin text-blue-500" size={14} />
                   Cargando tus expedientes...
                 </div>
+              ) : realDocuments.length === 0 ? (
+                <div className="text-center py-8 text-xs text-slate-500 italic border border-dashed border-white/5 rounded-2xl">
+                  No se han cargado contratos o anexos para este cliente en Neon DB.
+                </div>
               ) : (
-                <>
-                  {/* Documentos reales de Neon DB */}
-                  {realDocuments.map((doc) => (
-                    <div 
-                      key={doc.id} 
-                      className="flex justify-between items-center p-4 border border-blue-500/10 rounded-2xl bg-blue-500/[0.02] hover:bg-blue-500/[0.05] transition-all group"
-                    >
-                      <div className="flex items-center gap-3.5 overflow-hidden mr-3">
-                        <div className="w-10 h-10 rounded-xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0 shadow-[0_0_12px_rgba(59,130,246,0.1)]">
-                          <FileText size={20} />
+                realDocuments.map((doc) => (
+                  <div 
+                    key={doc.id} 
+                    className="flex justify-between items-center p-4 border border-blue-500/10 rounded-2xl bg-blue-500/[0.02] hover:bg-blue-500/[0.05] transition-all group"
+                  >
+                    <div className="flex items-center gap-3.5 overflow-hidden mr-3">
+                      <div className="w-10 h-10 rounded-xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0 shadow-[0_0_12px_rgba(59,130,246,0.1)]">
+                        <FileText size={20} />
+                      </div>
+                      <div className="space-y-0.5 min-w-0">
+                        <div className="text-xs font-bold text-white group-hover:text-blue-400 transition-colors truncate" title={doc.file_name}>
+                          {doc.file_name}
                         </div>
-                        <div className="space-y-0.5 min-w-0">
-                          <div className="text-xs font-bold text-white group-hover:text-blue-400 transition-colors truncate" title={doc.file_name}>
-                            {doc.file_name}
-                          </div>
-                          <div className="text-[10px] text-slate-400 font-light">
-                            {doc.document_type} • Cargado el {new Date(doc.uploaded_at).toLocaleDateString('es-MX')}
-                          </div>
+                        <div className="text-[10px] text-slate-400 font-light">
+                          {doc.document_type} • Cargado el {new Date(doc.uploaded_at).toLocaleDateString('es-MX')}
                         </div>
                       </div>
-
-                      <a
-                        href={doc.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center p-2.5 rounded-full bg-white/5 hover:bg-blue-600 border border-white/5 hover:border-blue-400/30 transition-all text-slate-400 hover:text-white cursor-pointer active:scale-90 shrink-0"
-                        title="Descargar Documento"
-                      >
-                        <Download size={14} />
-                      </a>
                     </div>
-                  ))}
 
-                  {/* Fallback de simulación frontend */}
-                  {simulatedClient.contracts.map((c, i) => (
-                    <div 
-                      key={`mock-${i}`} 
-                      className="flex justify-between items-center p-4 border border-white/5 rounded-2xl bg-slate-900/20 hover:bg-slate-900/40 transition-all group"
+                    <a
+                      href={doc.file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center p-2.5 rounded-full bg-white/5 hover:bg-blue-600 border border-white/5 hover:border-blue-400/30 transition-all text-slate-400 hover:text-white cursor-pointer active:scale-90 shrink-0"
+                      title="Descargar Documento"
                     >
-                      <div className="flex items-center gap-3.5 overflow-hidden mr-3">
-                        <div className="w-10 h-10 rounded-xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0 shadow-[0_0_12px_rgba(59,130,246,0.1)]">
-                          <FileText size={20} />
-                        </div>
-                        <div className="space-y-0.5 min-w-0">
-                          <div className="text-xs font-bold text-white group-hover:text-blue-400 transition-colors truncate" title={c.name}>
-                            {c.name}
-                          </div>
-                          <div className="text-[10px] text-slate-400 font-light">
-                            {c.size} • Simulado
-                          </div>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => handleDownload(c.name)}
-                        disabled={downloadingFile !== null}
-                        className="flex items-center justify-center p-2.5 rounded-full bg-white/5 hover:bg-blue-600 border border-white/5 hover:border-blue-400/30 transition-all text-slate-400 hover:text-white cursor-pointer active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-                        title="Descargar Contrato PDF"
-                      >
-                        {downloadingFile === c.name ? (
-                          <div className="relative w-5 h-5 flex items-center justify-center">
-                            <div className="absolute inset-0 rounded-full border-2 border-white/10 border-t-white animate-spin" />
-                            <span className="text-[8px] font-bold">{downloadProgress}%</span>
-                          </div>
-                        ) : (
-                          <Download size={14} />
-                        )}
-                      </button>
-                    </div>
-                  ))}
-                </>
+                      <Download size={14} />
+                    </a>
+                  </div>
+                ))
               )}
             </div>
           </section>
@@ -316,123 +293,97 @@ export default function ClientPage() {
             </div>
 
             <div className="divide-y divide-white/5">
-              {/* Registro de Pago de Mayo */}
-              <div className="py-4 flex justify-between items-center gap-4 first:pt-0 last:pb-0">
-                <div className="space-y-0.5">
-                  <div className="text-xs font-bold text-white flex items-center gap-2">
-                    Consultoría e Ingeniería de Software - Mayo 2026
-                    <span className="px-2 py-0.25 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] rounded-full font-bold">
-                      Pagado
-                    </span>
-                  </div>
-                  <div className="text-[10px] text-slate-400 font-light flex items-center gap-1.5">
-                    <span>Transacción: #KC-026-9812</span>
-                    <span>•</span>
-                    <span>Pagado el: {simulatedClient.lastPaymentDate}</span>
-                  </div>
+              {realBillings.length === 0 ? (
+                <div className="text-center py-8 text-xs text-slate-500 italic">
+                  No hay mensualidades o cargos registrados en su historial contable.
                 </div>
+              ) : (
+                realBillings.map((billing) => {
+                  const isPaid = billing.status === 'pagado';
+                  
+                  return (
+                    <div key={billing.id} className="py-4 flex justify-between items-center gap-4 first:pt-0 last:pb-0">
+                      <div className="space-y-0.5">
+                        <div className="text-xs font-bold text-white flex items-center gap-2">
+                          {billing.concept}
+                          <span className={`px-2 py-0.25 text-[9px] rounded-full font-bold uppercase ${
+                            billing.status === 'pagado' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                            billing.status === 'atrasado' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
+                            'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                          }`}>
+                            {billing.status}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-light flex items-center gap-1.5">
+                          <span>Fecha Límite: {new Date(billing.due_date).toLocaleDateString('es-MX')}</span>
+                          {billing.paid_at && (
+                            <>
+                              <span>•</span>
+                              <span>Pagado: {new Date(billing.paid_at).toLocaleDateString('es-MX')}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
 
-                <div className="flex items-center gap-3.5 shrink-0">
-                  <div className="text-right hidden sm:block">
-                    {/* Sumarle IVA si es fiscal para mostrar total en cuenta */}
-                    <div className="text-xs font-black text-white">
-                      {formatCurrency(simulatedClient.subtotal * (clientProfile === 'fiscal' ? 1.16 : 1.0))}
-                    </div>
-                    <div className="text-[9px] text-slate-500 font-medium">
-                      {clientProfile === 'fiscal' ? 'Total Neto Facturado' : 'Monto Recibido'}
-                    </div>
-                  </div>
+                      <div className="flex items-center gap-3.5 shrink-0">
+                        <div className="text-right hidden sm:block">
+                          <div className="text-xs font-black text-white">
+                            {formatCurrency(parseFloat(billing.total || billing.amount))}
+                          </div>
+                          <div className="text-[9px] text-slate-500 font-medium">
+                            {clientProfile === 'fiscal' ? 'Total Facturado' : 'Monto Recibido'}
+                          </div>
+                        </div>
 
-                  {/* RENDER CONDICIONAL DE BOTONES SEGÚN EL PERFIL (FISCAL VS NO FISCAL) */}
-                  {clientProfile === 'fiscal' ? (
-                    <div className="flex gap-1.5">
-                      <button
-                        onClick={() => handleDownload('Factura_XML.xml')}
-                        className="py-1.5 px-3 bg-white/5 hover:bg-blue-600/20 border border-white/5 hover:border-blue-500/20 rounded-xl text-[10px] font-semibold text-slate-300 hover:text-blue-400 transition-all flex items-center gap-1 cursor-pointer active:scale-95"
-                      >
-                        <FileCode size={12} />
-                        XML
-                      </button>
-                      <button
-                        onClick={() => handleDownload('Factura_PDF.pdf')}
-                        className="py-1.5 px-3 bg-white/5 hover:bg-emerald-600/20 border border-white/5 hover:border-emerald-500/20 rounded-xl text-[10px] font-semibold text-slate-300 hover:text-emerald-400 transition-all flex items-center gap-1 cursor-pointer active:scale-95"
-                      >
-                        <Download size={12} />
-                        PDF
-                      </button>
+                        {/* RENDER CONDICIONAL DE COMPROBANTES (SAT VS RECIBO INTERNO) */}
+                        {clientProfile === 'fiscal' ? (
+                          <div className="flex gap-1.5">
+                            {billing.sat_uuid ? (
+                              <>
+                                <button
+                                  onClick={() => handleDownload('Factura_XML.xml')}
+                                  className="py-1.5 px-3 bg-white/5 hover:bg-blue-600/20 border border-white/5 hover:border-blue-500/20 rounded-xl text-[10px] font-semibold text-slate-300 hover:text-blue-400 transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                                  title="Comprobante XML"
+                                >
+                                  <FileCode size={12} />
+                                  XML
+                                </button>
+                                <button
+                                  onClick={() => handleDownload('Factura_PDF.pdf')}
+                                  className="py-1.5 px-3 bg-white/5 hover:bg-emerald-600/20 border border-white/5 hover:border-emerald-500/20 rounded-xl text-[10px] font-semibold text-slate-300 hover:text-emerald-400 transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                                  title="Factura PDF"
+                                >
+                                  <Download size={12} />
+                                  PDF
+                                </button>
+                              </>
+                            ) : (
+                              <span className="text-[10px] text-slate-500 italic px-2">Pendiente SAT</span>
+                            )}
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setSelectedReceipt(billing);
+                              setIsReceiptModalOpen(true);
+                            }}
+                            className="py-1.5 px-3.5 bg-blue-600 hover:bg-blue-500 border border-blue-400/30 text-white rounded-xl text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                          >
+                            <ShieldCheck size={13} />
+                            Ver Recibo
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  ) : (
-                    <button
-                      onClick={() => setIsReceiptModalOpen(true)}
-                      className="py-1.5 px-3.5 bg-blue-600 hover:bg-blue-500 border border-blue-400/30 text-white rounded-xl text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
-                    >
-                      <ShieldCheck size={13} />
-                      Ver Recibo Digital
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Registro de Pago de Abril (Histórico) */}
-              <div className="py-4 flex justify-between items-center gap-4 last:pb-0">
-                <div className="space-y-0.5">
-                  <div className="text-xs font-bold text-white flex items-center gap-2">
-                    Consultoría e Ingeniería de Software - Abril 2026
-                    <span className="px-2 py-0.25 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] rounded-full font-bold">
-                      Pagado
-                    </span>
-                  </div>
-                  <div className="text-[10px] text-slate-400 font-light flex items-center gap-1.5">
-                    <span>Transacción: #KC-026-9214</span>
-                    <span>•</span>
-                    <span>Pagado el: 2026-04-15</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3.5 shrink-0">
-                  <div className="text-right hidden sm:block">
-                    <div className="text-xs font-black text-white">
-                      {formatCurrency(simulatedClient.subtotal * (clientProfile === 'fiscal' ? 1.16 : 1.0))}
-                    </div>
-                    <div className="text-[9px] text-slate-500 font-medium">
-                      {clientProfile === 'fiscal' ? 'Total Neto Facturado' : 'Monto Recibido'}
-                    </div>
-                  </div>
-
-                  {clientProfile === 'fiscal' ? (
-                    <div className="flex gap-1.5">
-                      <button
-                        onClick={() => handleDownload('Factura_XML_Abril.xml')}
-                        className="py-1.5 px-3 bg-slate-900/50 hover:bg-slate-900 text-slate-400 hover:text-white border border-white/5 rounded-xl text-[10px] transition-all flex items-center gap-1 cursor-pointer active:scale-95"
-                      >
-                        <FileCode size={12} />
-                        XML
-                      </button>
-                      <button
-                        onClick={() => handleDownload('Factura_PDF_Abril.pdf')}
-                        className="py-1.5 px-3 bg-slate-900/50 hover:bg-slate-900 text-slate-400 hover:text-white border border-white/5 rounded-xl text-[10px] transition-all flex items-center gap-1 cursor-pointer active:scale-95"
-                      >
-                        <Download size={12} />
-                        PDF
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setIsReceiptModalOpen(true)}
-                      className="py-1.5 px-3.5 bg-slate-900/50 hover:bg-slate-900 text-slate-300 border border-white/5 hover:border-white/10 rounded-xl text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
-                    >
-                      <ShieldCheck size={13} />
-                      Ver Recibo Digital
-                    </button>
-                  )}
-                </div>
-              </div>
+                  );
+                })
+              )}
             </div>
           </section>
 
         </div>
 
-        {/* Columna Derecha: Formulario Fiscal Autónomo */}
+        {/* Columna Derecha: Formulario Fiscal Real */}
         <div className="space-y-6">
           <section className="border border-white/10 bg-[#1e293b]/20 backdrop-blur-md rounded-3xl p-6 h-fit space-y-5 shadow-lg">
             <div>
@@ -459,7 +410,7 @@ export default function ClientPage() {
               
               {/* Razón Social */}
               <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Razón Social o Nombre Completo</label>
+                <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block">Razón Social o Nombre Fiscal</label>
                 <input
                   type="text"
                   value={razonSocial}
@@ -474,7 +425,7 @@ export default function ClientPage() {
 
               {/* RFC */}
               <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">RFC del Contribuyente</label>
+                <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block">RFC del Contribuyente</label>
                 <input
                   type="text"
                   value={rfc}
@@ -490,7 +441,7 @@ export default function ClientPage() {
 
               {/* Código Postal */}
               <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Código Postal de Facturación</label>
+                <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block">Código Postal Fiscal</label>
                 <input
                   type="text"
                   value={cp}
@@ -506,7 +457,7 @@ export default function ClientPage() {
 
               {/* Régimen Fiscal */}
               <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Régimen Fiscal (SAT)</label>
+                <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block">Régimen Fiscal (SAT)</label>
                 <select
                   value={regimenFiscal}
                   onChange={(e) => setRegimenFiscal(e.target.value)}
@@ -523,11 +474,27 @@ export default function ClientPage() {
               {/* Botón de Guardado */}
               <button
                 type="submit"
-                className="w-full mt-2 py-3 bg-blue-600 hover:bg-blue-500 border border-blue-400/40 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-95"
+                disabled={isSavingForm}
+                className="w-full mt-2 py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-white/5 disabled:text-slate-500 disabled:border-white/5 border border-blue-400/40 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-95"
               >
-                <Save size={14} />
-                Guardar Cambios Fiscales
+                {isSavingForm ? (
+                  <>
+                    <RefreshCw className="animate-spin" size={14} />
+                    Guardando en Neon...
+                  </>
+                ) : (
+                  <>
+                    <Save size={14} />
+                    Guardar Cambios Fiscales
+                  </>
+                )}
               </button>
+
+              {saveSuccess && (
+                <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-[10px] text-center font-semibold">
+                  ¡Datos fiscales sincronizados correctamente!
+                </div>
+              )}
             </form>
           </section>
 
@@ -545,13 +512,20 @@ export default function ClientPage() {
               </div>
 
               <form onSubmit={handleCsfUpload} className="space-y-3">
-                <div className="relative border border-dashed border-white/15 hover:border-blue-500/50 rounded-xl p-3.5 bg-slate-950/20 text-center transition-colors">
+                <div 
+                  onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                  onDragLeave={() => setIsDragOver(false)}
+                  onDrop={() => setIsDragOver(false)}
+                  className={`relative border border-dashed rounded-xl p-3.5 bg-slate-950/20 text-center transition-all ${
+                    isDragOver ? 'border-blue-500 bg-blue-500/5 shadow-[0_0_15px_rgba(59,130,246,0.15)]' : 'border-white/15 hover:border-blue-500/50'
+                  }`}
+                >
                   <input
                     id="client-csf-input"
                     type="file"
                     accept=".pdf"
                     onChange={(e) => setSelectedCsfFile(e.target.files?.[0] || null)}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                   />
                   <div className="text-xs text-slate-400 font-light space-y-1">
                     {selectedCsfFile ? (
@@ -559,7 +533,7 @@ export default function ClientPage() {
                     ) : (
                       <>
                         <p className="text-slate-300 font-semibold">Seleccionar CSF PDF</p>
-                        <p className="text-[10px] text-slate-500">Arrastra o haz clic aquí</p>
+                        <p className="text-[10px] text-slate-500 font-normal">Arrastra o haz clic aquí</p>
                       </>
                     )}
                   </div>
@@ -601,12 +575,12 @@ export default function ClientPage() {
       </div>
 
       {/* --- MODAL FLOTANTE DE RECIBO DIGITAL INTERNO (SOLO NO FISCAL) --- */}
-      {isReceiptModalOpen && (
+      {isReceiptModalOpen && selectedReceipt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Fondo obscuro */}
           <div 
-            className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
-            onClick={() => setIsReceiptModalOpen(false)}
+            className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm animate-fade-in"
+            onClick={() => { setIsReceiptModalOpen(false); setSelectedReceipt(null); }}
           />
           
           {/* Caja del Recibo */}
@@ -620,8 +594,8 @@ export default function ClientPage() {
                 </div>
                 <h3 className="text-sm font-bold text-slate-300 mt-2">Comprobante de Pago Electrónico</h3>
               </div>
-              <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 text-[9px] rounded-full font-bold">
-                PAGADO
+              <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 text-[9px] rounded-full font-bold uppercase">
+                {selectedReceipt.status}
               </span>
             </div>
 
@@ -630,11 +604,15 @@ export default function ClientPage() {
               <div className="grid grid-cols-2 gap-3 py-1 border-b border-white/5">
                 <div>
                   <span className="text-slate-500 text-[10px]">Folio del Recibo</span>
-                  <p className="font-bold font-mono">KC-2026-9812</p>
+                  <p className="font-bold font-mono uppercase">{selectedReceipt.id.substring(0, 8)}</p>
                 </div>
                 <div className="text-right">
                   <span className="text-slate-500 text-[10px]">Fecha de Pago</span>
-                  <p className="font-bold">{simulatedClient.lastPaymentDate}</p>
+                  <p className="font-bold">
+                    {selectedReceipt.paid_at 
+                      ? new Date(selectedReceipt.paid_at).toLocaleDateString('es-MX') 
+                      : new Date(selectedReceipt.due_date).toLocaleDateString('es-MX')}
+                  </p>
                 </div>
               </div>
 
@@ -646,7 +624,7 @@ export default function ClientPage() {
               <div className="space-y-1.5 border-t border-b border-white/5 py-2">
                 <span className="text-slate-500 text-[10px]">Concepto de Pago</span>
                 <p className="font-light text-white leading-relaxed">
-                  Consultoría de Software, Desarrollo e Integración de Sistemas a la Medida
+                  {selectedReceipt.concept}
                 </p>
               </div>
 
@@ -654,11 +632,11 @@ export default function ClientPage() {
               <div className="space-y-1 bg-white/[0.01] p-3 border border-white/5 rounded-2xl">
                 <div className="flex justify-between">
                   <span className="text-slate-400 font-light">Monto de Consultoría</span>
-                  <span className="font-bold text-white">{formatCurrency(simulatedClient.subtotal)}</span>
+                  <span className="font-bold text-white">{formatCurrency(parseFloat(selectedReceipt.total || selectedReceipt.amount))}</span>
                 </div>
                 <div className="flex justify-between border-t border-white/5 pt-1.5 mt-1.5 text-sm">
                   <span className="font-bold text-white">Importe Total Recibido</span>
-                  <span className="font-black text-emerald-400">{formatCurrency(simulatedClient.subtotal)}</span>
+                  <span className="font-black text-emerald-400">{formatCurrency(parseFloat(selectedReceipt.total || selectedReceipt.amount))}</span>
                 </div>
               </div>
 
@@ -669,14 +647,14 @@ export default function ClientPage() {
                   Sello Digital de Validación Interna
                 </span>
                 <p className="font-mono text-[9px] text-slate-500 break-all leading-normal bg-slate-950 p-2 rounded-lg border border-white/5">
-                  kc_internal_sec_9f7d2a8b3c4e5f6a7b8c9d0e1f2a3b4c5d6e_verify_sha256
+                  kc_internal_sec_{selectedReceipt.id.replace(/-/g, '')}_verify_sha256
                 </p>
               </div>
             </div>
 
             {/* Acción de cierre */}
             <button
-              onClick={() => setIsReceiptModalOpen(false)}
+              onClick={() => { setIsReceiptModalOpen(false); setSelectedReceipt(null); }}
               className="w-full mt-6 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-slate-200 transition-all cursor-pointer text-center"
             >
               Cerrar Comprobante
